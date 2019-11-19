@@ -6,6 +6,9 @@ language_tabs: # must be one of https://git.io/vQNgJ
 
 includes:
   - errors
+  
+toc_footers:
+  - Updated on Nov 19, 2019 18:53
 
 search: true
 ---
@@ -535,8 +538,12 @@ third_party_idp | object[] | List of third party Identity Provider.
 Due to the module heavily relying on the base authentication and user info modules. Third Party IdP support is planned to be added after the basic functionality of the system has been developed to a testable stage.
 
 The following API Endpoints will be implemented:
+<br>
 ```
 Link Third Party Accounts
+```
+<br>
+```
 Unlink Third Party Accounts
 ```
 
