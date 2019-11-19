@@ -8,7 +8,7 @@ includes:
   - errors
   
 toc_footers:
-  - Updated on Nov 19, 2019 18:53
+  - Updated on Nov 19, 2019
 
 search: true
 ---
@@ -44,6 +44,8 @@ You must replace <code>access_token_here</code> with your access token.
 </aside>
 
 ## Request Authorization Code
+
+> To request an authorization code, use this snippet:
 
 ```shell
 curl "https://example.com/oauth2/auth" \
@@ -104,6 +106,8 @@ scope | string | Requested scope.
 
 ## Exchange Code for Token / Refresh Token
 
+> To exchange an authorization code for an access token, use this code:
+
 ```shell
 curl "https://example.com/oauth2/token" \
   -X POST \
@@ -162,6 +166,8 @@ scope | string | Requested scope.
 
 ## Retrieve Token Information
 
+> To get a token's meta-information, use this code:
+
 ```shell
 curl "https://example.com/oauth2/tokeninfo" \
   -X GET \
@@ -209,7 +215,9 @@ scope | string | Requested scope.
 expires_in | number | Expiration time in seconds.
 access_type | string | The access type associated with the token, can be **online** or **offline**.
 
-## Logout existing Tokens
+## Force Token Logout
+
+> To force logout on all tokens associated with an access token, use this code:
 
 ```shell
 curl "https://example.com/oauth2/logout" \
@@ -251,6 +259,8 @@ This request has no response body.
 # Account Management
 
 ## Registration
+
+> To register a new user, use this code:
 
 ```shell
 curl "https://example.com/oauth2/user/register" \
@@ -314,9 +324,9 @@ The User Registration API is prone to <strong>structural changes</strong>.
 
 Parameter | Type | Description
 --------- | ---- | -----------
-Authorization | string | **Required** if not using **query parameters**.
+Authorization | string | **Required**. Access token for identifying the user.
 
-### Query Parameters
+### Request Body
 
 Parameter | Type | Description
 --------- | ---- | -----------
@@ -336,25 +346,15 @@ Password confirmation matches should be handled by frontend logic.
 
 ### Response Body
 
-On a successful request, the created user profile is returned.
+On a successful request, the created user profile is returned. 
 
-Parameter | Type | Description
---------- | ---- | -----------
-name | object | Holds the names of the user
-`name.family_name` | string | The user's last name.
-`name.given_name` | string | The user's first name.
-`name.full_name` | string | The user's full name.
-email | object | Holds the email info of the user
-`email.address` | string | The user's email address
-`email.verified` | boolean | Indicates if the user-supplied email address has been verified.
-phone | object | Holds the contact number info of the user
-`phone.country_code` | string | The country code associated with the user's email.
-`phone.value` | string | The user's contact number
-`phone.verified` | boolean | Indicates if the user-supplied contact number has been verified.
-receive_promotion | boolean | Whether the user opted-out of promotional materials.
-third_party_idp | object[] | List of third party Identity Provider.
+<aside class="success">
+The structure is identical with the response body found in <a href="#retrieve-user-info">User Profile</a>.
+</aside>
 
-## Update
+## Update User
+
+> To update a existing user, use this code:
 
 ```shell
 curl "https://example.com/oauth2/user/update" \
@@ -367,9 +367,6 @@ curl "https://example.com/oauth2/user/update" \
 
 ```json
 {
-  "email": {
-    "address": "katie_chan@example.com"
-  },
   "phone": {
     "country_code": "61",
     "value": "(02) 9876 5432"
@@ -388,8 +385,8 @@ curl "https://example.com/oauth2/user/update" \
     "full_name": "Kate Chan"
   },
   "email": {
-    "address": "katie_chan@example.com",
-    "verified": false
+    "address": "kate_chan@example.com",
+    "verified": false 
   },
   "phone": {
     "country_code": "61",
@@ -401,7 +398,11 @@ curl "https://example.com/oauth2/user/update" \
 }
 ```
 
-Create a new user.
+Update a existing user.
+
+<aside class="notice">
+Updating phone / email address required a one use access token with elevated scope. The API Endpoint to request the one use token is planned to be added in an upcoming update.
+</aside>
 
 <aside class="warning">
 The User Update API is prone to <strong>structural changes</strong>.
@@ -415,20 +416,20 @@ The User Update API is prone to <strong>structural changes</strong>.
 
 Parameter | Type | Description
 --------- | ---- | -----------
-Authorization | string | **Required** if not using **query parameters**.
+Authorization | string | **Required**. Access token for identifying the user.
 
-### Query Parameters
+### Request Body
 
 Parameter | Type | Description
 --------- | ---- | -----------
-name | object | **Required**. Holds the names of the user
-`name.family_name` | string | **Required**. The user's last name.
-`name.given_name` | string | **Required**. The user's first name.
-email | object | **Required**. Holds the email info of the user
-`email.address` | string | **Required**. The user's email address
-phone | object | **Required**. Holds the contact number info of the user
+name | object | **Optional**. Holds the names of the user.
+`name.family_name` | string | **Optional**. The user's last name.
+`name.given_name` | string | **Optional**. The user's first name.
+email | object | **Optional**. Holds the email info of the user.
+`email.address` | string | **Optional**. The user's email address.
+phone | object | **Optional**. Holds the contact number info of the user.
 `phone.country_code` | string | **Optional**. The country code associated with the user's email. Default to **852** if not specified.
-`phone.value` | string | **Required**. The user's contact number
+`phone.value` | string | **Optional**. The user's contact number.
 
 <aside class="notice">
 Option to change password will be added in the future.
@@ -436,27 +437,93 @@ Option to change password will be added in the future.
 
 ### Response Body
 
-On a successful request, the created user profile is returned.
+On a successful request, the updated user profile is returned.
+
+<aside class="success">
+The structure is identical with the response body found in <a href="#retrieve-user-info">User Profile</a>.
+</aside>
+
+## Verify Email / Phone
+
+> To verify an user's email address, use this code:
+
+```shell
+curl "https://example.com/oauth2/user/verify" \
+  -X POST \
+  -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..." \
+  -d @request.json
+```
+
+> In request.json:
+
+```json
+{
+  "action_type": "verify_email",
+  "verification_type": "email", 
+  "code": "8D4VS0"
+}
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "name": {
+    "family_name": "Chan",
+    "given_name": "Kate",
+    "full_name": "Kate Chan"
+  },
+  "email": {
+    "address": "kate_chan@example.com",
+    "verified": true
+  },
+  "phone": {
+    "country_code": "852",
+    "value": "98765432",
+    "verified": true
+  },
+  "receive_promotion": false,
+  "third_part_idp": []
+}
+```
+
+Verify a existing user.
+
+<aside class="warning">
+The User Verification API is prone to <strong>structural changes</strong>.
+</aside>
+
+### HTTP Request
+
+`POST /oauth2/user/verify`
+
+### Request Header
 
 Parameter | Type | Description
 --------- | ---- | -----------
-name | object | Holds the names of the user
-`name.family_name` | string | The user's last name.
-`name.given_name` | string | The user's first name.
-`name.full_name` | string | The user's full name.
-email | object | Holds the email info of the user
-`email.address` | string | The user's email address
-`email.verified` | boolean | Indicates if the user-supplied email address has been verified.
-phone | object | Holds the contact number info of the user
-`phone.country_code` | string | The country code associated with the user's email.
-`phone.value` | string | The user's contact number
-`phone.verified` | boolean | Indicates if the user-supplied contact number has been verified.
-receive_promotion | boolean | Whether the user opted-out of promotional materials.
-third_party_idp | object[] | List of third party Identity Provider.
+Authorization | string | **Required**. Access token for identifying the user.
+
+### Request Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+action_type | string | **Required**. Action to request, valid parameters are **verify_email** and **verify_phone**.
+verification_type | string | **Required**. Verification Medium, valid parameters are **email** and **sms**.
+code | string | **Required**. Received verification code.
+
+### Response Body
+
+On a successful request, the verified user profile is returned.
+
+<aside class="success">
+The structure is identical with the response body found in <a href="#retrieve-user-info">User Profile</a>.
+</aside>
 
 # User Profile
 
 ## Retrieve User Info
+
+> To get an user's profile information, use this code:
 
 ```shell
 curl "https://example.com/oauth2/tokeninfo" \
@@ -531,7 +598,7 @@ phone | object | Holds the contact number info of the user
 `phone.value` | string | The user's contact number
 `phone.verified` | boolean | Indicates if the user-supplied contact number has been verified.
 receive_promotion | boolean | Whether the user opted-out of promotional materials.
-third_party_idp | object[] | List of third party Identity Provider.
+third_party_idp | object[] | List of Third Party Identity Provider.
 
 # Third Party Identity Providers
 
