@@ -8,7 +8,7 @@ includes:
   - errors
   
 toc_footers:
-  - Updated on Nov 19, 2019
+  - Updated on Nov 25, 2019
 
 search: true
 ---
@@ -43,12 +43,12 @@ The system expects for the access token to be included in all non-authentication
 You must replace <code>access_token_here</code> with your access token.
 </aside>
 
-## Request Authorization Code
+## Request Access Token with Password
 
-> To request an authorization code, use this snippet:
+> To request an access token with password, use this snippet:
 
 ```shell
-curl "https://example.com/oauth2/auth" \
+curl "https://example.com/oauth/auth" \
   -X POST \
   -H "Content-Type: application/json" \
   -d @request.json
@@ -58,11 +58,9 @@ curl "https://example.com/oauth2/auth" \
 
 ```json
 {
-  "response_type": "code",
-  "access_type": "offline",
-  "client_id": "409605819262.apps.example.com",
-  "device_id": "68753A44-4D6F-1226-9C60-0050E4C00067",
   "grant_type": "password",
+  "client_id": "1",
+  "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
   "username": "kate_chan@example.com",
   "password": "yourStrong(!)Password"
 }
@@ -72,44 +70,42 @@ curl "https://example.com/oauth2/auth" \
 
 ```json
 {
-  "code": "4/tQECVk4xk-AJ_NWgawqL3KYIcvHZynXDGw5dk6I_ZnN7FrktsauTt9GJjTJkncINA_yA62P9Vdc9GR95uH84oOk",
-  "scope": ""
+  "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJh...",
+  "token_type": "Bearer",
+  "expires_in": 3708799
 }
 ```
 
-This endpoint request an authorization code that expires after one use.
+This endpoint issue an access token for first party application, using username and password credentials.
 
 ### HTTP Request
 
-`POST /oauth2/auth`
+`POST /oauth/auth`
 
 ### Request Body
 
 Parameter | Type | Description
 --------- | ---- | -----------
-response_type | string | **Required**. The request response type. Currently only supports **code**.
-access_type | string | **Required**. Indicates whether the application can refresh access tokens without providing client credentials. Valid parameters are **online** and **offline**.<br><br>Set the value to offline instructs the Membership authorization server to return a refresh token and an access token the first time your application exchanges an authorization code for tokens.
+grant_type | string | **Required**. Specify whether the application uses traditional username and password, or third party idp.<br><br>Valid parameters are **password**, and **identity**.
 client_id | string | **Required**. The client id registered for the application.
-device_id | string | **Optional**. Required if the client id is registered for an mobile application.
-scope | string | **Optional**. Not supported.
-grant_type | string | **Optional**. Currently only supports **password**. Specify whether the application uses traditional username and password, or an in-browser consent screen.<br><br>Valid parameters are **consent**, which is the default value, and **password**.
+client_secret | string | **Required**. The client secret registered for the application.
 username | string | **Required** if grant_type is **password**.
 password | string | **Required** if grant_type is **password**.
-redirect_uri | string | **Required** if grant_type is **consent**.
 
 ### Response Body
 
 Parameter | Type | Description
 --------- | ---- | -----------
-code | string | Authorization code for exchanging access token.
-scope | string | Requested scope.
+access_token | string | Access token.
+token_type | string | Token Type. Only **Bearer** is available.
+expires_in | string | Expiration time in seconds.
 
-## Exchange Code for Token / Refresh Token
+## Request Access Token with Third Party Identity Token
 
-> To exchange an authorization code for an access token, use this code:
+> To request an access token with third party identity token, use this snippet:
 
 ```shell
-curl "https://example.com/oauth2/token" \
+curl "https://example.com/oauth/auth" \
   -X POST \
   -H "Content-Type: application/json" \
   -d @request.json
@@ -119,10 +115,15 @@ curl "https://example.com/oauth2/token" \
 
 ```json
 {
-  "code": "4/tQECVk4xk-AJ_NWgawqL3KYIcvHZynXDGw5dk6I7FrktsauT...",
-  "client_id": "409605819262.apps.example.com",
-  "device_id": "68753A44-4D6F-1226-9C60-0050E4C00067",
-  "grant_type": "authorization_code"
+  "grant_type": "identity",
+  "client_id": "1",
+  "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
+  "identity": {
+    "provider": "facebook",
+    "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJh..."
+    "third_party_id": "2981827904",
+    "meta": {...} // Third Party Meta Infomation
+  }
 }
 ```
 
@@ -130,46 +131,44 @@ curl "https://example.com/oauth2/token" \
 
 ```json
 {
-  "access_token": "ya29.Il-xB8pDp2D1WTszc7SZ3MueWywlfp_t-t-if...",
-  "scope": "",
-  "expires_in": 3600,
-  "token_type": "Bearer"
+  "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJh...",
+  "token_type": "Bearer",
+  "expires_in": 3708799
 }
 ```
 
-This endpoint exchanges authorization code for an access token.
+This endpoint issue an access token with an provided third party identity token.
 
 ### HTTP Request
 
-`POST /oauth2/token`
+`POST /oauth/auth`
 
 ### Request Body
 
 Parameter | Type | Description
 --------- | ---- | -----------
-code | string | **Required** if grant_type is **authorization_code**. Authorization code from request token. Expires after one use.
-refresh_token | string | **Required** if grant_type is **refresh_token**.
+grant_type | string | **Required**. Specify whether the application uses traditional username and password, or third party idp.<br><br>Valid parameters are **password**, and **identity**.
 client_id | string | **Required**. The client id registered for the application.
-device_id | string | **Optional**. Required if the client id is registered for an mobile application.
-scope | string | **Optional**. Not supported.
-grant_type | string | **Required**. Valid parameters are **authorization_code** and **refresh_token**.
+client_secret | string | **Required**. The client secret registered for the application.
+`identity.provider` | string | **Required** if grant_type is **identity**. The identity provider id, valid value are **facebook**, **google** and **theclub**.
+`identity.access_token` | string | **Required** if grant_type is **identity**. Access token acquired from third party idp.
+`identity.third_party_id` | string | **Required** if grant_type is **identity**. Access token associated with third party idp.
+`identity.meta` | object | **Optional** if grant_type is **identity**. Meta data from third party idp.
 
 ### Response Body
 
 Parameter | Type | Description
 --------- | ---- | -----------
-access_token | string | Access token for user related API Request.
-token_type | string | Only possible value is **Bearer**.
-expires_in | number | Expiration time in seconds.
-refresh_token | string | Present if authorization code's access_type is offline. Long-lived token used for refreshing access token.
-scope | string | Requested scope.
+access_token | string | Access token.
+token_type | string | Token Type. Only **Bearer** is available.
+expires_in | string | Expiration time in seconds.
 
-## Retrieve Token Information
+## Request Token Info
 
-> To get a token's meta-information, use this code:
+> To get token info, use this code:
 
 ```shell
-curl "https://example.com/oauth2/tokeninfo" \
+curl "https://example.com/oauth/tokeninfo" \
   -X GET \
   -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..."
 ```
@@ -178,11 +177,7 @@ curl "https://example.com/oauth2/tokeninfo" \
 
 ```json
 {
-  "issued_to": "409605819262.apps.example.com",
-  "audience": "409605819262.apps.example.com",
-  "scope": "",
-  "expires_in": 3000,
-  "access_type": "offline"
+  "expires_in": 3000
 }
 ```
 
@@ -190,65 +185,41 @@ Get meta information related to a token.
 
 ### HTTP Request
 
-`GET /oauth2/tokeninfo`
+`GET /oauth/tokeninfo`
 
 ### Request Header
 
 Parameter | Type | Description
 --------- | ---- | -----------
-Authorization | string | **Required** if not using **query parameters**.
-
-### Query Parameters
-
-Parameter | Type | Description
---------- | ---- | -----------
-access_token | string | **Required** if using not **request header**.
-client_id | string | **Optional**. Used for verifying a correct recipient in the response.
+Authorization | string | **Required**
 
 ### Response Body
 
 Parameter | Type | Description
 --------- | ---- | -----------
-issued_to | string | Client id associated with token.
-audience | string | Client id associated with the token info request.
-scope | string | Requested scope.
 expires_in | number | Expiration time in seconds.
-access_type | string | The access type associated with the token, can be **online** or **offline**.
 
-## Force Token Logout
+## Revoke Token Logout
 
-> To force logout on all tokens associated with an access token, use this code:
+> To revoke a token, use this code:
 
 ```shell
-curl "https://example.com/oauth2/logout" \
-  -X GET \
+curl "https://example.com/oauth/revoke" \
+  -X POST \
   -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..."
 ```
 
-Invalid an access token and its associated refresh token.
-
-<aside class="warning">
-It is recommended to avoid implementing the function to explicitly invalidate access tokens. This functionality adds moderate overhead to the authentication process.
-<br><br>
-The logout logic can be handled by frontend application. Simply removing the tokens from internal storage is sufficiently secure.
-</aside>
+Revoke an existing token.
 
 ### HTTP Request
 
-`GET /oauth2/logout`
+`GET /oauth/revoke`
 
 ### Request Header
 
 Parameter | Type | Description
 --------- | ---- | -----------
-Authorization | string | **Required** if not using **query parameters**.
-
-### Query Parameters
-
-Parameter | Type | Description
---------- | ---- | -----------
-access_token | string | **Required** if using not **request header**.
-client_id | string | **Optional**. Used for verifying a correct recipient in the response.
+Authorization | string | **Required**
 
 ### Response Body
 
@@ -263,7 +234,7 @@ This request has no response body.
 > To register a new user, use this code:
 
 ```shell
-curl "https://example.com/oauth2/user/register" \
+curl "https://example.com/oauth/register" \
   -X POST \
   -d @request.json
 ```
@@ -287,44 +258,11 @@ curl "https://example.com/oauth2/user/register" \
 }
 ```
 
-> The above command returns JSON structured like this:
-
-```json
-{
-  "name": {
-    "family_name": "Chan",
-    "given_name": "Kate",
-    "full_name": "Kate Chan"
-  },
-  "email": {
-    "address": "kate_chan@example.com",
-    "verified": false
-  },
-  "phone": {
-    "country_code": "852",
-    "value": "91234567",
-    "verified": false
-  },
-  "receive_promotion": true,
-  "third_part_idp": []
-}
-```
-
 Create a new user.
-
-<aside class="warning">
-The User Registration API is prone to <strong>structural changes</strong>.
-</aside>
 
 ### HTTP Request
 
-`POST /oauth2/user/register`
-
-### Request Header
-
-Parameter | Type | Description
---------- | ---- | -----------
-Authorization | string | **Required**. Access token for identifying the user.
+`POST /oauth/register`
 
 ### Request Body
 
@@ -339,25 +277,20 @@ phone | object | **Required**. Holds the contact number info of the user
 `phone.country_code` | string | **Optional**. The country code associated with the user's email. Default to **852** if not specified.
 `phone.value` | string | **Required**. The user's contact number
 password | string | **Required**. The user's password.
-
-<aside class="notice">
-Password confirmation matches should be handled by frontend logic.
-</aside>
+password_confirmation | string | **Required**. The user's password confirmation.
 
 ### Response Body
 
-On a successful request, the created user profile is returned. 
-
-<aside class="success">
-The structure is identical with the response body found in <a href="#retrieve-user-info">User Profile</a>.
+<aside class="notice">
+This request has no response body.
 </aside>
 
-## Update User
+## Update User Password
 
-> To update a existing user, use this code:
+> To update a existing user's password, use this code:
 
 ```shell
-curl "https://example.com/oauth2/user/update" \
+curl "https://example.com/oauth/update" \
   -X POST \
   -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..." \
   -d @request.json
@@ -367,50 +300,19 @@ curl "https://example.com/oauth2/user/update" \
 
 ```json
 {
-  "phone": {
-    "country_code": "61",
-    "value": "(02) 9876 5432"
-  },
-  "receive_promotion": false
+  "password": {
+    "old": "12345678",
+    "new": "25846901",
+    "new_confirmation": "25846901"
+  }
 }
 ```
 
-> The above command returns JSON structured like this:
-
-```json
-{
-  "name": {
-    "family_name": "Chan",
-    "given_name": "Kate",
-    "full_name": "Kate Chan"
-  },
-  "email": {
-    "address": "kate_chan@example.com",
-    "verified": false 
-  },
-  "phone": {
-    "country_code": "61",
-    "value": "(02) 9876 5432",
-    "verified": false
-  },
-  "receive_promotion": false,
-  "third_part_idp": []
-}
-```
-
-Update a existing user.
-
-<aside class="notice">
-Updating phone / email address required a one use access token with elevated scope. The API Endpoint to request the one use token is planned to be added in an upcoming update.
-</aside>
-
-<aside class="warning">
-The User Update API is prone to <strong>structural changes</strong>.
-</aside>
+Update a existing user's password.
 
 ### HTTP Request
 
-`POST /oauth2/user/update`
+`POST /oauth/update`
 
 ### Request Header
 
@@ -422,101 +324,93 @@ Authorization | string | **Required**. Access token for identifying the user.
 
 Parameter | Type | Description
 --------- | ---- | -----------
-name | object | **Optional**. Holds the names of the user.
-`name.family_name` | string | **Optional**. The user's last name.
-`name.given_name` | string | **Optional**. The user's first name.
-email | object | **Optional**. Holds the email info of the user.
-`email.address` | string | **Optional**. The user's email address.
-phone | object | **Optional**. Holds the contact number info of the user.
+password | object | **Required**. Holds the password info of the user.
+`password.old` | string | **Required**. Password currently in-used.
+`password.new` | string | **Required**. A new password to change to.
+`password.new_confirmation` | string | **Required**. Confirmation for the new password.
+
+### Response Body
+
+<aside class="notice">
+This request has no response body.
+</aside>
+
+## Update User's Phone
+
+> To update a existing user's phone, use this code:
+
+```shell
+curl "https://example.com/oauth/update" \
+  -X POST \
+  -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..." \
+  -d @request.json
+```
+
+> In request.json:
+
+```json
+{
+  "phone": {
+    "country_code": "81",
+    "value": "98456788"
+  }
+}
+```
+
+> After Providing an OTP:
+
+```shell
+curl "https://example.com/oauth/update" \
+  -X POST \
+  -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..." \
+  -d @request.json
+```
+
+> In request.json:
+
+```json
+{
+  "phone": {
+    "country_code": "81",
+    "value": "98456788",
+    "verification_code": "4865"
+  }
+}
+```
+
+Update a existing user's phone.
+
+### HTTP Request
+
+`POST /oauth/update`
+
+<aside class="notice">
+This operation requires two consecutive request.
+<br>
+The first request will trigger a one-time-password to be sent to the new contact number provided. An error will be thrown if a daily sms limit has been reached.
+<br>
+For the changes to be committed. A second request should be sent, with the original payload and the provided otp. 
+</aside>
+
+### Request Header
+
+Parameter | Type | Description
+--------- | ---- | -----------
+Authorization | string | **Required**. Access token for identifying the user.
+
+### Request Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+phone | object | **Required**. Holds the contact number info of the user
 `phone.country_code` | string | **Optional**. The country code associated with the user's email. Default to **852** if not specified.
-`phone.value` | string | **Optional**. The user's contact number.
+`phone.value` | string | **Required**. The user's contact number
+`phone.verification_code` | string | **Optional**. The verification code for the new contact no.
+
+### Response Body
 
 <aside class="notice">
-Option to change password will be added in the future.
-</aside>
-
-### Response Body
-
-On a successful request, the updated user profile is returned.
-
-<aside class="success">
-The structure is identical with the response body found in <a href="#retrieve-user-info">User Profile</a>.
-</aside>
-
-## Verify Email / Phone
-
-> To verify an user's email address, use this code:
-
-```shell
-curl "https://example.com/oauth2/user/verify" \
-  -X POST \
-  -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..." \
-  -d @request.json
-```
-
-> In request.json:
-
-```json
-{
-  "action_type": "verify_email",
-  "verification_type": "email", 
-  "code": "8D4VS0"
-}
-```
-
-> The above command returns JSON structured like this:
-
-```json
-{
-  "name": {
-    "family_name": "Chan",
-    "given_name": "Kate",
-    "full_name": "Kate Chan"
-  },
-  "email": {
-    "address": "kate_chan@example.com",
-    "verified": true
-  },
-  "phone": {
-    "country_code": "852",
-    "value": "98765432",
-    "verified": true
-  },
-  "receive_promotion": false,
-  "third_part_idp": []
-}
-```
-
-Verify a existing user.
-
-<aside class="warning">
-The User Verification API is prone to <strong>structural changes</strong>.
-</aside>
-
-### HTTP Request
-
-`POST /oauth2/user/verify`
-
-### Request Header
-
-Parameter | Type | Description
---------- | ---- | -----------
-Authorization | string | **Required**. Access token for identifying the user.
-
-### Request Body
-
-Parameter | Type | Description
---------- | ---- | -----------
-action_type | string | **Required**. Action to request, valid parameters are **verify_email** and **verify_phone**.
-verification_type | string | **Required**. Verification Medium, valid parameters are **email** and **sms**.
-code | string | **Required**. Received verification code.
-
-### Response Body
-
-On a successful request, the verified user profile is returned.
-
-<aside class="success">
-The structure is identical with the response body found in <a href="#retrieve-user-info">User Profile</a>.
+This request has no response body.
 </aside>
 
 # User Profile
@@ -526,7 +420,7 @@ The structure is identical with the response body found in <a href="#retrieve-us
 > To get an user's profile information, use this code:
 
 ```shell
-curl "https://example.com/oauth2/tokeninfo" \
+curl "https://example.com/oauth/userinfo" \
   -X GET \
   -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..."
 ```
@@ -550,7 +444,7 @@ curl "https://example.com/oauth2/tokeninfo" \
     "verified": true
   },
   "receive_promotion": false,
-  "third_part_idp": [
+  "identities": [
     // Third Party Metadata
     { ... },
     { ... },
@@ -561,26 +455,15 @@ curl "https://example.com/oauth2/tokeninfo" \
 
 Get user profile information.
 
-<aside class="warning">
-The User Info API is prone to <strong>structural changes</strong>.
-</aside>
-
 ### HTTP Request
 
-`GET /oauth2/userinfo`
+`GET /oauth/userinfo`
 
 ### Request Header
 
 Parameter | Type | Description
 --------- | ---- | -----------
-Authorization | string | **Required** if not using **query parameters**.
-
-### Query Parameters
-
-Parameter | Type | Description
---------- | ---- | -----------
-access_token | string | **Required** if using not **request header**.
-client_id | string | **Optional**. Used for verifying a correct recipient in the response.
+Authorization | string | **Required**
 
 ### Response Body
 
@@ -598,23 +481,112 @@ phone | object | Holds the contact number info of the user
 `phone.value` | string | The user's contact number
 `phone.verified` | boolean | Indicates if the user-supplied contact number has been verified.
 receive_promotion | boolean | Whether the user opted-out of promotional materials.
-third_party_idp | object[] | List of Third Party Identity Provider.
+identities | object[] | List of Third Party Identity Provider.
 
 # Third Party Identity Providers
 
-Due to the module heavily relying on the base authentication and user info modules. Third Party IdP support is planned to be added after the basic functionality of the system has been developed to a testable stage.
+## Link Third Party Identity
 
-The following API Endpoints will be implemented:
-<br>
+> To link with a Third Party Identity Provider, use this code:
+
+```shell
+curl "https://example.com/oauth/link" \
+  -X POST \
+  -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..." \
+  -H "Content-Type: application/json" \
+  -d @request.json
 ```
-Link Third Party Accounts
+
+> In request.json:
+
+```json
+{
+  "client_id": "1",
+  "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
+  "identity": {
+    "provider": "facebook",
+    "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJh..."
+    "third_party_id": "2981827904",
+    "meta": {...} // Third Party Meta Infomation
+  }
+}
 ```
-<br>
-```
-Unlink Third Party Accounts
-```
+
+This endpoint links an existing account with a third party identity provider.
+
+### HTTP Request
+
+`POST /oauth/link`
+
+### Request Header
+
+Parameter | Type | Description
+--------- | ---- | -----------
+Authorization | string | **Required**
+
+### Request Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+client_id | string | **Required**. The client id registered for the application.
+client_secret | string | **Required**. The client secret registered for the application.
+`identity.provider` | string | **Required** if grant_type is **identity**. The identity provider id, valid value are **facebook**, **google** and **theclub**.
+`identity.access_token` | string | **Required** if grant_type is **identity**. Access token acquired from third party idp.
+`identity.third_party_id` | string | **Required** if grant_type is **identity**. Access token associated with third party idp.
+`identity.meta` | object | **Optional** if grant_type is **identity**. Meta data from third party idp.
+
+### Response Body
 
 <aside class="notice">
-Coming Soon
+This request has no response body.
 </aside>
 
+## Remove Third Party Identity
+
+> To remove a link with Third Party Identity Provider, use this code:
+
+```shell
+curl "https://example.com/oauth/unlink" \
+  -X POST \
+  -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..." \
+  -H "Content-Type: application/json" \
+  -d @request.json
+```
+
+> In request.json:
+
+```json
+{
+  "client_id": "1",
+  "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
+  "identity": {
+    "provider": "facebook"
+  }
+}
+```
+
+This endpoint removes an existing account's link with a third party identity provider.
+
+### HTTP Request
+
+`POST /oauth/unlink`
+
+### Request Header
+
+Parameter | Type | Description
+--------- | ---- | -----------
+Authorization | string | **Required**
+
+### Request Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+client_id | string | **Required**. The client id registered for the application.
+client_secret | string | **Required**. The client secret registered for the application.
+`identity.provider` | string | **Required** if grant_type is **identity**. The identity provider id, valid value are **facebook**, **google** and **theclub**.
+
+### Response Body
+
+<aside class="notice">
+This request has no response body.
+</aside>
