@@ -8,7 +8,7 @@ includes:
   - errors
   
 toc_footers:
-  - Updated on Nov 25, 2019
+  - Updated on Nov 26, 2019
 
 search: true
 ---
@@ -16,10 +16,6 @@ search: true
 # Introduction
 
 This document outlines the API Endpoints used for authenticating and retrieving user related data. Third party login are still in early development, and are not included in this document.
-
-<aside class="warning">
-  The system is in early development, the API Endpoints listed in this document are not finalized. 
-</aside>
 
 # Authentication
 
@@ -31,7 +27,13 @@ curl "api_endpoint_here"
   -H "Authorization: Bearer access_token_here"
 ```
 
-> Make sure to replace `access_token_here` with your access token.
+> If an invalid or expired token is provided, the `401 Unauthorized` status code is returned:
+
+```json
+{
+  "message": "Unauthenticated."
+}
+```
 
 Membership Portal uses authorization token to allow access to the API. You can request an access token using the API Endpoints below.
 
@@ -43,7 +45,7 @@ The system expects for the access token to be included in all non-authentication
 You must replace <code>access_token_here</code> with your access token.
 </aside>
 
-## Request Access Token with Password
+## Password Grant
 
 > To request an access token with password, use this snippet:
 
@@ -71,6 +73,7 @@ curl "https://example.com/oauth/auth" \
 ```json
 {
   "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJh...",
+  "refresh_token": "def50200831c0bf69f010244d2d381a2209e409b...",
   "token_type": "Bearer",
   "expires_in": 3708799
 }
@@ -86,21 +89,22 @@ This endpoint issue an access token for first party application, using username 
 
 Parameter | Type | Description
 --------- | ---- | -----------
-grant_type | string | **Required**. Specify whether the application uses traditional username and password, or third party idp.<br><br>Valid parameters are **password**, and **identity**.
+grant_type | string | **Required**. Should be set to **password**. Valid parameters are **refresh_token**, **password** and **identity**.
 client_id | string | **Required**. The client id registered for the application.
 client_secret | string | **Required**. The client secret registered for the application.
-username | string | **Required** if grant_type is **password**.
-password | string | **Required** if grant_type is **password**.
+username | string | **Required**
+password | string | **Required**
 
 ### Response Body
 
 Parameter | Type | Description
 --------- | ---- | -----------
 access_token | string | Access token.
+refresh_token | string | Refresh token. Expires after one use.
 token_type | string | Token Type. Only **Bearer** is available.
 expires_in | string | Expiration time in seconds.
 
-## Request Access Token with Third Party Identity Token
+## Third Party Identity Grant
 
 > To request an access token with third party identity token, use this snippet:
 
@@ -132,6 +136,7 @@ curl "https://example.com/oauth/auth" \
 ```json
 {
   "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJh...",
+  "refresh_token": "def50200831c0bf69f010244d2d381a2209e409b...",
   "token_type": "Bearer",
   "expires_in": 3708799
 }
@@ -147,23 +152,85 @@ This endpoint issue an access token with an provided third party identity token.
 
 Parameter | Type | Description
 --------- | ---- | -----------
-grant_type | string | **Required**. Specify whether the application uses traditional username and password, or third party idp.<br><br>Valid parameters are **password**, and **identity**.
+grant_type | string | **Required**. Should be set to **identity**. Valid parameters are **refresh_token**, **password** and **identity**.
 client_id | string | **Required**. The client id registered for the application.
 client_secret | string | **Required**. The client secret registered for the application.
-`identity.provider` | string | **Required** if grant_type is **identity**. The identity provider id, valid value are **facebook**, **google** and **theclub**.
-`identity.access_token` | string | **Required** if grant_type is **identity**. Access token acquired from third party idp.
-`identity.third_party_id` | string | **Required** if grant_type is **identity**. Access token associated with third party idp.
-`identity.meta` | object | **Optional** if grant_type is **identity**. Meta data from third party idp.
+`identity.provider` | string | **Required**. The identity provider id, valid value are **facebook**, **google** and **theclub**.
+`identity.access_token` | string | **Required**. Access token acquired from third party identity provider.
+`identity.third_party_id` | string | **Required**. The user id from third party identity provider.
+`identity.meta` | object | **Optional**. Meta data from third party idp.
 
 ### Response Body
 
 Parameter | Type | Description
 --------- | ---- | -----------
 access_token | string | Access token.
+refresh_token | string | Refresh token. Expires after one use.
 token_type | string | Token Type. Only **Bearer** is available.
 expires_in | string | Expiration time in seconds.
 
-## Request Token Info
+## Refresh Token
+
+> To request a refreshed access token, use this snippet:
+
+```shell
+curl "https://example.com/oauth/auth" \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -d @request.json
+```
+
+> In request.json:
+
+```json
+{
+  "grant_type": "refresh_token",
+  "client_id": "1",
+  "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
+  "refresh_token": "def50200fb9ac80073fb02c4a2da735a0ad15ee1..."
+}
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJh...",
+  "refresh_token": "def50200831c0bf69f010244d2d381a2209e409b...",
+  "token_type": "Bearer",
+  "expires_in": 3708799
+}
+```
+
+This endpoint issues a new access token with a given refresh token
+
+<aside class="warning">
+This action revokes the provided <strong>refresh token</strong> and the <strong>access token</strong> associated with it.
+</aside>
+
+### HTTP Request
+
+`POST /oauth/auth`
+
+### Request Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+grant_type | string | **Required**. Should be set to **refresh_token**. Valid parameters are **refresh_token**, **password** and **identity**.
+client_id | string | **Required**. The client id registered for the application.
+client_secret | string | **Required**. The client secret registered for the application.
+refresh_token | string | **Required**
+
+### Response Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+access_token | string | Access token.
+refresh_token | string | Refresh token. Expires after one use.
+token_type | string | Token Type. Only **Bearer** is available.
+expires_in | string | Expiration time in seconds.
+
+## Token Verification
 
 > To get token info, use this code:
 
@@ -173,11 +240,20 @@ curl "https://example.com/oauth/tokeninfo" \
   -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..."
 ```
 
-> The above command returns JSON structured like this:
+> The above command returns JSON structured like this with a 200 status code:
 
 ```json
 {
+  "token_type": "Bearer",
   "expires_in": 3000
+}
+```
+
+> If an invalid or expired token is provided, the `401 Unauthorized` status code is returned:
+
+```json
+{
+  "message": "Unauthenticated."
 }
 ```
 
@@ -197,9 +273,14 @@ Authorization | string | **Required**
 
 Parameter | Type | Description
 --------- | ---- | -----------
+token_type | string | Token Type. Only **Bearer** is available.
 expires_in | number | Expiration time in seconds.
 
-## Revoke Token Logout
+<aside class="warning">
+A <strong>401 Unauthorized</strong> response is returned if the token included is expired, revoked or otherwise invalid.
+</aside>
+
+## Revoke Token 
 
 > To revoke a token, use this code:
 
@@ -209,7 +290,7 @@ curl "https://example.com/oauth/revoke" \
   -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..."
 ```
 
-Revoke an existing token.
+Revoke an existing access token and its associated refresh token.
 
 ### HTTP Request
 
@@ -243,11 +324,10 @@ curl "https://example.com/oauth/register" \
 
 ```json
 {
-  "name": {
-    "family_name": "Chan",
-    "given_name": "Kate",
-    "full_name": "Kate Chan"
-  },
+  "client_id": "1",
+  "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
+  "given_name": "Kate",
+  "family_name": "Chan",
   "email": {
     "address": "kate_chan@example.com"
   },
@@ -268,13 +348,13 @@ Create a new user.
 
 Parameter | Type | Description
 --------- | ---- | -----------
-name | object | **Required**. Holds the names of the user
-`name.family_name` | string | **Required**. The user's last name.
-`name.given_name` | string | **Required**. The user's first name.
+client_id | string | **Required**. The client id registered for the application.
+client_secret | string | **Required**. The client secret registered for the application.
+given_name | string | **Required**. The user's first name.
+family_name | string | **Required**. The user's last name.
 email | object | **Required**. Holds the email info of the user
 `email.address` | string | **Required**. The user's email address
 phone | object | **Required**. Holds the contact number info of the user
-`phone.country_code` | string | **Optional**. The country code associated with the user's email. Default to **852** if not specified.
 `phone.value` | string | **Required**. The user's contact number
 password | string | **Required**. The user's password.
 password_confirmation | string | **Required**. The user's password confirmation.
@@ -285,7 +365,7 @@ password_confirmation | string | **Required**. The user's password confirmation.
 This request has no response body.
 </aside>
 
-## Update User Password
+## Update Profile
 
 > To update a existing user's password, use this code:
 
@@ -300,6 +380,54 @@ curl "https://example.com/oauth/update" \
 
 ```json
 {
+  "update_type": "profile",
+  "given_name": "Kate",
+  "family_name": "Chan"
+}
+```
+
+Update a existing user's profile.
+
+### HTTP Request
+
+`POST /oauth/update`
+
+### Request Header
+
+Parameter | Type | Description
+--------- | ---- | -----------
+Authorization | string | **Required**. Access token for identifying the user.
+
+### Request Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+update_type | string | **Required**. Should be set to **profile**. Valid parameters are **password**, **phone** and **profile**.
+given_name | string | **Required**. The user's first name.
+family_name | string | **Required**. The user's last name.
+
+### Response Body
+
+<aside class="notice">
+This request has no response body.
+</aside>
+
+## Update Password
+
+> To update a existing user's password, use this code:
+
+```shell
+curl "https://example.com/oauth/update" \
+  -X POST \
+  -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..." \
+  -d @request.json
+```
+
+> In request.json:
+
+```json
+{
+  "update_type": "password",
   "password": {
     "old": "12345678",
     "new": "25846901",
@@ -324,6 +452,7 @@ Authorization | string | **Required**. Access token for identifying the user.
 
 Parameter | Type | Description
 --------- | ---- | -----------
+update_type | string | **Required**. Should be set to **password**. Valid parameters are **password**, **phone** and **profile**.
 password | object | **Required**. Holds the password info of the user.
 `password.old` | string | **Required**. Password currently in-used.
 `password.new` | string | **Required**. A new password to change to.
@@ -335,7 +464,7 @@ password | object | **Required**. Holds the password info of the user.
 This request has no response body.
 </aside>
 
-## Update User's Phone
+## Update Phone
 
 > To update a existing user's phone, use this code:
 
@@ -350,14 +479,14 @@ curl "https://example.com/oauth/update" \
 
 ```json
 {
+  "update_type": "phone",
   "phone": {
-    "country_code": "81",
     "value": "98456788"
   }
 }
 ```
 
-> After Providing an OTP:
+> After Providing a verification code:
 
 ```shell
 curl "https://example.com/oauth/update" \
@@ -370,8 +499,8 @@ curl "https://example.com/oauth/update" \
 
 ```json
 {
+  "update_type": "phone",
   "phone": {
-    "country_code": "81",
     "value": "98456788",
     "verification_code": "4865"
   }
@@ -402,8 +531,8 @@ Authorization | string | **Required**. Access token for identifying the user.
 
 Parameter | Type | Description
 --------- | ---- | -----------
+update_type | string | **Required**. Should be set to **password**. Valid parameters are **password**, **phone** and **profile**.
 phone | object | **Required**. Holds the contact number info of the user
-`phone.country_code` | string | **Optional**. The country code associated with the user's email. Default to **852** if not specified.
 `phone.value` | string | **Required**. The user's contact number
 `phone.verification_code` | string | **Optional**. The verification code for the new contact no.
 
@@ -439,7 +568,6 @@ curl "https://example.com/oauth/userinfo" \
     "verified": true
   },
   "phone": {
-    "country_code": "852",
     "value": "91234567",
     "verified": true
   },
@@ -477,11 +605,16 @@ email | object | Holds the email info of the user
 `email.address` | string | The user's email address
 `email.verified` | boolean | Indicates if the user-supplied email address has been verified.
 phone | object | Holds the contact number info of the user
-`phone.country_code` | string | The country code associated with the user's email.
 `phone.value` | string | The user's contact number
 `phone.verified` | boolean | Indicates if the user-supplied contact number has been verified.
 receive_promotion | boolean | Whether the user opted-out of promotional materials.
 identities | object[] | List of Third Party Identity Provider.
+
+## Update User
+
+<aside class="notice">
+Refer to the <a href="#update-profile">Account Management Section</a>.
+</aside>
 
 # Third Party Identity Providers
 
@@ -501,8 +634,6 @@ curl "https://example.com/oauth/link" \
 
 ```json
 {
-  "client_id": "1",
-  "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
   "identity": {
     "provider": "facebook",
     "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJh..."
@@ -528,12 +659,10 @@ Authorization | string | **Required**
 
 Parameter | Type | Description
 --------- | ---- | -----------
-client_id | string | **Required**. The client id registered for the application.
-client_secret | string | **Required**. The client secret registered for the application.
-`identity.provider` | string | **Required** if grant_type is **identity**. The identity provider id, valid value are **facebook**, **google** and **theclub**.
-`identity.access_token` | string | **Required** if grant_type is **identity**. Access token acquired from third party idp.
-`identity.third_party_id` | string | **Required** if grant_type is **identity**. Access token associated with third party idp.
-`identity.meta` | object | **Optional** if grant_type is **identity**. Meta data from third party idp.
+`identity.provider` | string | **Required**. The identity provider id, valid value are **facebook**, **google** and **theclub**.
+`identity.access_token` | string | **Required**. Access token acquired from third party idp.
+`identity.third_party_id` | string | **Required**. Access token associated with third party idp.
+`identity.meta` | object | **Optional**. Meta data from third party idp.
 
 ### Response Body
 
@@ -557,8 +686,6 @@ curl "https://example.com/oauth/unlink" \
 
 ```json
 {
-  "client_id": "1",
-  "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
   "identity": {
     "provider": "facebook"
   }
@@ -581,9 +708,7 @@ Authorization | string | **Required**
 
 Parameter | Type | Description
 --------- | ---- | -----------
-client_id | string | **Required**. The client id registered for the application.
-client_secret | string | **Required**. The client secret registered for the application.
-`identity.provider` | string | **Required** if grant_type is **identity**. The identity provider id, valid value are **facebook**, **google** and **theclub**.
+`identity.provider` | string | **Required**. The identity provider id, valid value are **facebook**, **google** and **theclub**.
 
 ### Response Body
 
