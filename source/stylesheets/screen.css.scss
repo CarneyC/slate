@@ -36,17 +36,20 @@ html, body {
   -webkit-text-size-adjust: none; /* Never autoresize text */
 }
 
-body {
-  display: none;
+//body {
+//  display: none;
+//}
+
+a {
+  color: #5889a2;
+  font-weight: bold;
 }
 
 aside.success a {
-  font-weight: bold;
   color: #195020;
 }
 
 aside.notice a {
-  font-weight: bold;
   color: #094363;
 }
 

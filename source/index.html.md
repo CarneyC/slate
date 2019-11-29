@@ -50,7 +50,7 @@ You must replace <code>access_token_here</code> with your access token.
 > To request an access token with password, use this snippet:
 
 ```shell
-curl "https://example.com/oauth/auth" \
+curl "https://membership-hktcare.webssup.com/oauth/auth" \
   -X POST \
   -H "Content-Type: application/json" \
   -d @request.json
@@ -61,7 +61,7 @@ curl "https://example.com/oauth/auth" \
 ```json
 {
   "grant_type": "password",
-  "client_id": "1",
+  "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
   "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
   "username": "kate_chan@example.com",
   "password": "yourStrong(!)Password"
@@ -109,7 +109,7 @@ expires_in | string | Expiration time in seconds.
 > To request an access token with third party identity token, use this snippet:
 
 ```shell
-curl "https://example.com/oauth/auth" \
+curl "https://membership-hktcare.webssup.com/oauth/auth" \
   -X POST \
   -H "Content-Type: application/json" \
   -d @request.json
@@ -120,7 +120,7 @@ curl "https://example.com/oauth/auth" \
 ```json
 {
   "grant_type": "identity",
-  "client_id": "1",
+  "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
   "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
   "identity": {
     "provider": "facebook",
@@ -174,7 +174,7 @@ expires_in | string | Expiration time in seconds.
 > To request a refreshed access token, use this snippet:
 
 ```shell
-curl "https://example.com/oauth/auth" \
+curl "https://membership-hktcare.webssup.com/oauth/auth" \
   -X POST \
   -H "Content-Type: application/json" \
   -d @request.json
@@ -185,7 +185,7 @@ curl "https://example.com/oauth/auth" \
 ```json
 {
   "grant_type": "refresh_token",
-  "client_id": "1",
+  "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
   "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
   "refresh_token": "def50200fb9ac80073fb02c4a2da735a0ad15ee1..."
 }
@@ -235,7 +235,7 @@ expires_in | string | Expiration time in seconds.
 > To get token info, use this code:
 
 ```shell
-curl "https://example.com/oauth/tokeninfo" \
+curl "https://membership-hktcare.webssup.com/oauth/tokeninfo" \
   -X GET \
   -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..."
 ```
@@ -285,7 +285,7 @@ A <strong>401 Unauthorized</strong> response is returned if the token included i
 > To revoke a token, use this code:
 
 ```shell
-curl "https://example.com/oauth/revoke" \
+curl "https://membership-hktcare.webssup.com/oauth/revoke" \
   -X POST \
   -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..."
 ```
@@ -315,7 +315,7 @@ This request has no response body.
 > To register a new user, use this code:
 
 ```shell
-curl "https://example.com/oauth/register" \
+curl "https://membership-hktcare.webssup.com/oauth/register" \
   -X POST \
   -d @request.json
 ```
@@ -324,7 +324,7 @@ curl "https://example.com/oauth/register" \
 
 ```json
 {
-  "client_id": "1",
+  "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
   "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
   "given_name": "Kate",
   "family_name": "Chan",
@@ -370,7 +370,7 @@ This request has no response body.
 > To update a existing user's password, use this code:
 
 ```shell
-curl "https://example.com/oauth/update" \
+curl "https://membership-hktcare.webssup.com/oauth/update" \
   -X POST \
   -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..." \
   -d @request.json
@@ -417,7 +417,7 @@ This request has no response body.
 > To update a existing user's password, use this code:
 
 ```shell
-curl "https://example.com/oauth/update" \
+curl "https://membership-hktcare.webssup.com/oauth/update" \
   -X POST \
   -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..." \
   -d @request.json
@@ -469,7 +469,7 @@ This request has no response body.
 > To update a existing user's phone, use this code:
 
 ```shell
-curl "https://example.com/oauth/update" \
+curl "https://membership-hktcare.webssup.com/oauth/update" \
   -X POST \
   -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..." \
   -d @request.json
@@ -489,7 +489,7 @@ curl "https://example.com/oauth/update" \
 > After Providing a verification code:
 
 ```shell
-curl "https://example.com/oauth/update" \
+curl "https://membership-hktcare.webssup.com/oauth/update" \
   -X POST \
   -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..." \
   -d @request.json
@@ -549,7 +549,7 @@ This request has no response body.
 > To get an user's profile information, use this code:
 
 ```shell
-curl "https://example.com/oauth/userinfo" \
+curl "https://membership-hktcare.webssup.com/oauth/userinfo" \
   -X GET \
   -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..."
 ```
@@ -558,11 +558,8 @@ curl "https://example.com/oauth/userinfo" \
 
 ```json
 {
-  "name": {
-    "family_name": "Chan",
-    "given_name": "Kate",
-    "full_name": "Kate Chan"
-  },
+  "given_name": "Kate",
+  "family_name": "Chan",
   "email": {
     "address": "kate_chan@example.com",
     "verified": true
@@ -597,10 +594,8 @@ Authorization | string | **Required**
 
 Parameter | Type | Description
 --------- | ---- | -----------
-name | object | Holds the names of the user
-`name.family_name` | string | The user's last name.
-`name.given_name` | string | The user's first name.
-`name.full_name` | string | The user's full name.
+given_name | string | The user's first name.
+family_name | string | The user's last name.
 email | object | Holds the email info of the user
 `email.address` | string | The user's email address
 `email.verified` | boolean | Indicates if the user-supplied email address has been verified.
@@ -623,7 +618,7 @@ Refer to the <a href="#update-profile">Account Management Section</a>.
 > To link with a Third Party Identity Provider, use this code:
 
 ```shell
-curl "https://example.com/oauth/link" \
+curl "https://membership-hktcare.webssup.com/oauth/link" \
   -X POST \
   -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..." \
   -H "Content-Type: application/json" \
@@ -675,7 +670,7 @@ This request has no response body.
 > To remove a link with Third Party Identity Provider, use this code:
 
 ```shell
-curl "https://example.com/oauth/unlink" \
+curl "https://membership-hktcare.webssup.com/oauth/unlink" \
   -X POST \
   -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..." \
   -H "Content-Type: application/json" \
@@ -715,3 +710,182 @@ Parameter | Type | Description
 <aside class="notice">
 This request has no response body.
 </aside>
+
+
+# Server-side API
+
+## Authorization
+
+> To request an access token with client credential, use this snippet:
+
+```shell
+curl "https://membership-hktcare.webssup.com/oauth/auth" \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -d @request.json
+```
+
+> In request.json:
+
+```json
+{
+  "grant_type": "client_credentials",
+  "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
+  "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
+}
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJh...",
+  "refresh_token": "def50200831c0bf69f010244d2d381a2209e409b...",
+  "token_type": "Bearer",
+  "expires_in": 3708799
+}
+```
+
+This endpoint issue an access token for server-side application.
+
+### HTTP Request
+
+`POST /oauth/auth`
+
+### Request Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+grant_type | string | **Required**. Should be set to **client_credentials**. Valid parameters are **refresh_token**, **password** and **identity**.
+client_id | string | **Required**. The client id registered for the application.
+client_secret | string | **Required**. The client secret registered for the application.
+
+### Response Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+access_token | string | Access token.
+token_type | string | Token Type. Only **Bearer** is available.
+expires_in | string | Expiration time in seconds.
+
+## List Paginated Users
+
+> To list 5 users sorted by given name in descending order at page 2, use this code:
+
+```shell
+curl "https://membership-hktcare.webssup.com/oauth/list?limit=5&page=2&sort_by=given_name&order=desc" \
+  -X GET \
+  -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..."
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+    "items": [
+        {
+            "uuid": "b6a225c0-37d4-4fc3-b6fc-0973b483055b",
+            "family_name": "chan",
+            "given_name": "mandy",
+            "email": {
+                "address": "user@example.com",
+                "verified": false
+            },
+            "phone": {
+                "value": "98764821",
+                "verifed_at": null,
+                "verified": false
+            },
+            "identities": [...]
+        },
+        {...},
+        {...},
+        {...},
+        {...}
+    ],
+    "total": 121,
+    "current_page": 2,
+    "last_page": 24
+}
+```
+
+List users with pagination.
+
+### HTTP Request
+
+`GET /oauth/list`
+
+### Request Header
+
+Parameter | Type | Description
+--------- | ---- | -----------
+Authorization | string | **Required**
+
+### Query Parameters
+
+Parameter | Type | Description
+--------- | ---- | -----------
+limit | number | **Required**. Item per page.
+page | number | **Optional**. The page to be fetched, default to 1.
+sort_by | string | **Optional**. Column to sort by, valid value are **created_at**, which is the default value, **updated_at**, **given_name** and **family_name**.
+order | string | **Optional**. Valid value are **asc** and **desc**.
+
+### Response Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+items | user[] | User entities. Refer to <a href="#retrieve-user-info">User Info</a> section for the structure.
+total | number | Total number of user records.
+current_page | number | Current page.
+last_page | number | Total number of page.
+
+## Impersonate User
+
+> To impersonate a user, use this code:
+
+```shell
+curl "https://membership-hktcare.webssup.com/impersonate/b511c586-7d37-40a2-a6ac-54edce386cf9" \
+  -X GET \
+  -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..."
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJh...",
+  "token_type": "Bearer",
+  "expires_in": 3708799
+}
+```
+
+Impersonate a user.
+
+### HTTP Request
+
+`GET /oauth/impersonate/:uuid`
+
+<aside class="notice">
+To access user related info, see <a href="#retreive-user-info">User Info</a> and <a href="#update-profile">Update Profile</a>.<br>
+The access token granted has elevated scope. And can update user profile without verification code being provided.
+</aside>
+
+### Request Header
+
+Parameter | Type | Description
+--------- | ---- | -----------
+Authorization | string | **Required**
+
+### Path Parameters
+
+Parameter | Type | Description
+--------- | ---- | -----------
+uuid | string | **Required**. User to impersonate.
+
+### Response Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+access_token | string | Access token.
+token_type | string | Token Type. Only **Bearer** is available.
+expires_in | string | Expiration time in seconds.
