@@ -50,7 +50,7 @@ You must replace <code>access_token_here</code> with your access token.
 > To request an access token with password, use this snippet:
 
 ```shell
-curl "https://membership-hktcare.webssup.com/oauth/auth" \
+curl "https://membership-hktcare.webssup.com/oauth/token" \
   -X POST \
   -H "Content-Type: application/json" \
   -d @request.json
@@ -83,7 +83,7 @@ This endpoint issue an access token for first party application, using username 
 
 ### HTTP Request
 
-`POST /oauth/auth`
+`POST /oauth/token`
 
 ### Request Body
 
@@ -109,7 +109,7 @@ expires_in | string | Expiration time in seconds.
 > To request an access token with third party identity token, use this snippet:
 
 ```shell
-curl "https://membership-hktcare.webssup.com/oauth/auth" \
+curl "https://membership-hktcare.webssup.com/oauth/token" \
   -X POST \
   -H "Content-Type: application/json" \
   -d @request.json
@@ -146,7 +146,7 @@ This endpoint issue an access token with an provided third party identity token.
 
 ### HTTP Request
 
-`POST /oauth/auth`
+`POST /oauth/token`
 
 ### Request Body
 
@@ -174,7 +174,7 @@ expires_in | string | Expiration time in seconds.
 > To request a refreshed access token, use this snippet:
 
 ```shell
-curl "https://membership-hktcare.webssup.com/oauth/auth" \
+curl "https://membership-hktcare.webssup.com/oauth/token" \
   -X POST \
   -H "Content-Type: application/json" \
   -d @request.json
@@ -210,7 +210,7 @@ This action revokes the provided <strong>refresh token</strong> and the <strong>
 
 ### HTTP Request
 
-`POST /oauth/auth`
+`POST /oauth/token`
 
 ### Request Body
 
@@ -326,15 +326,19 @@ curl "https://membership-hktcare.webssup.com/oauth/register" \
 {
   "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
   "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
+  "title": "ms",
   "given_name": "Kate",
   "family_name": "Chan",
+  "hkid": "A1234567",
   "email": {
     "address": "kate_chan@example.com"
   },
   "phone": {
-    "value": "91234567"
+    "value": "91234567",
+    "verification_code": "8642"
   },
-  "password": "yourStrong(!)Password"
+  "password": "yourStrong(!)Password",
+  "password_confirmation": "yourStrong(!)Password",
 }
 ```
 
@@ -344,18 +348,26 @@ Create a new user.
 
 `POST /oauth/register`
 
+<aside class="notice">
+A verification code must be provided. To trigger the verification code process, use the <a href="verify-phone">Verify Phone</a> endpoint.
+</aside>
+
+
 ### Request Body
 
 Parameter | Type | Description
 --------- | ---- | -----------
 client_id | string | **Required**. The client id registered for the application.
 client_secret | string | **Required**. The client secret registered for the application.
+title | string | **Required**. The user's title, valid parameters are **mr** and **ms**.
 given_name | string | **Required**. The user's first name.
 family_name | string | **Required**. The user's last name.
+hkid | string | **Required**. The user's HKID.
 email | object | **Required**. Holds the email info of the user
 `email.address` | string | **Required**. The user's email address
 phone | object | **Required**. Holds the contact number info of the user
 `phone.value` | string | **Required**. The user's contact number
+`phone.verification_code` | string | **Required**. The verification code sent by <a href="verify-phone">Verify Phone</a>.
 password | string | **Required**. The user's password.
 password_confirmation | string | **Required**. The user's password confirmation.
 
@@ -382,7 +394,8 @@ curl "https://membership-hktcare.webssup.com/oauth/update" \
 {
   "update_type": "profile",
   "given_name": "Kate",
-  "family_name": "Chan"
+  "family_name": "Chan",
+  "receive_promotions": false
 }
 ```
 
@@ -403,8 +416,9 @@ Authorization | string | **Required**. Access token for identifying the user.
 Parameter | Type | Description
 --------- | ---- | -----------
 update_type | string | **Required**. Should be set to **profile**. Valid parameters are **password**, **phone** and **profile**.
-given_name | string | **Required**. The user's first name.
-family_name | string | **Required**. The user's last name.
+given_name | string | **Optional**. The user's first name.
+family_name | string | **Optional**. The user's last name.
+receive_promotions | string | **Optional**. Indicates where the user should receive promotional materials.
 
 ### Response Body
 
@@ -514,11 +528,11 @@ Update a existing user's phone.
 `POST /oauth/update`
 
 <aside class="notice">
-This operation requires two consecutive request.
+Calling this API endpoint without providing a verification code will trigger a code to be sent to the given phone number.
 <br>
-The first request will trigger a one-time-password to be sent to the new contact number provided. An error will be thrown if a daily sms limit has been reached.
+The verification code can also be triggered using <a href="verify-phone">Verify Phone</a> endpoint.
 <br>
-For the changes to be committed. A second request should be sent, with the original payload and the provided otp. 
+For the changes to be committed. A request should be sent with the verification code and the original payload. 
 </aside>
 
 ### Request Header
@@ -542,6 +556,52 @@ phone | object | **Required**. Holds the contact number info of the user
 This request has no response body.
 </aside>
 
+
+## Verify Phone
+
+> To trigger a verification to be sent, use this code:
+
+```shell
+curl "https://membership-hktcare.webssup.com/oauth/verify" \
+  -X POST \
+  -d @request.json
+```
+
+> In request.json:
+
+```json
+{
+  "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
+  "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
+  "verification_type": "phone",
+  "phone": {
+    "value": "98456788"
+  }
+}
+```
+
+Request a verification code.
+
+### HTTP Request
+
+`POST /oauth/verify`
+
+### Request Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+client_id | string | **Required**. The client id registered for the application.
+client_secret | string | **Required**. The client secret registered for the application.
+verification_type | string | **Required**. Should be set to **phone**. Valid parameters are **phone** and **email**.
+phone | object | **Required**. Holds the contact number info of the user
+`phone.value` | string | **Required**. The user's contact number
+
+### Response Body
+
+<aside class="notice">
+This request has no response body.
+</aside>
+
 # User Profile
 
 ## Retrieve User Info
@@ -558,8 +618,10 @@ curl "https://membership-hktcare.webssup.com/oauth/userinfo" \
 
 ```json
 {
+  "title": "ms",
   "given_name": "Kate",
   "family_name": "Chan",
+  "hkid": "A1234567",
   "email": {
     "address": "kate_chan@example.com",
     "verified": true
@@ -594,8 +656,10 @@ Authorization | string | **Required**
 
 Parameter | Type | Description
 --------- | ---- | -----------
+title | string | The user's title, valid parameters are **mr** and **ms**.
 given_name | string | The user's first name.
 family_name | string | The user's last name.
+hkid | string | The user's HKID.
 email | object | Holds the email info of the user
 `email.address` | string | The user's email address
 `email.verified` | boolean | Indicates if the user-supplied email address has been verified.
@@ -719,7 +783,7 @@ This request has no response body.
 > To request an access token with client credential, use this snippet:
 
 ```shell
-curl "https://membership-hktcare.webssup.com/oauth/auth" \
+curl "https://membership-hktcare.webssup.com/oauth/token" \
   -X POST \
   -H "Content-Type: application/json" \
   -d @request.json
@@ -731,7 +795,7 @@ curl "https://membership-hktcare.webssup.com/oauth/auth" \
 {
   "grant_type": "client_credentials",
   "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
-  "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
+  "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU"
 }
 ```
 
@@ -750,7 +814,7 @@ This endpoint issue an access token for server-side application.
 
 ### HTTP Request
 
-`POST /oauth/auth`
+`POST /oauth/token`
 
 ### Request Body
 
@@ -785,8 +849,10 @@ curl "https://membership-hktcare.webssup.com/oauth/list?limit=5&page=2&sort_by=g
     "items": [
         {
             "uuid": "b6a225c0-37d4-4fc3-b6fc-0973b483055b",
+            "title": "ms",
             "family_name": "chan",
             "given_name": "mandy",
+            "hkid": "A1234567",
             "email": {
                 "address": "user@example.com",
                 "verified": false
