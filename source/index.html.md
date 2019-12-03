@@ -8,7 +8,7 @@ includes:
   - errors
   
 toc_footers:
-  - Updated on Nov 26, 2019
+  - Updated on Dec 3, 2019
 
 search: true
 ---
@@ -104,70 +104,11 @@ refresh_token | string | Refresh token. Expires after one use.
 token_type | string | Token Type. Only **Bearer** is available.
 expires_in | string | Expiration time in seconds.
 
-## Third Party Identity Grant
+## Identity Grant
 
-> To request an access token with third party identity token, use this snippet:
-
-```shell
-curl "https://membership-hktcare.webssup.com/oauth/token" \
-  -X POST \
-  -H "Content-Type: application/json" \
-  -d @request.json
-```
-
-> In request.json:
-
-```json
-{
-  "grant_type": "identity",
-  "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
-  "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
-  "identity": {
-    "provider": "facebook",
-    "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJh..."
-    "third_party_id": "2981827904",
-    "meta": {...} // Third Party Meta Infomation
-  }
-}
-```
-
-> The above command returns JSON structured like this:
-
-```json
-{
-  "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJh...",
-  "refresh_token": "def50200831c0bf69f010244d2d381a2209e409b...",
-  "token_type": "Bearer",
-  "expires_in": 3708799
-}
-```
-
-This endpoint issue an access token with an provided third party identity token.
-
-### HTTP Request
-
-`POST /oauth/token`
-
-### Request Body
-
-Parameter | Type | Description
---------- | ---- | -----------
-grant_type | string | **Required**. Should be set to **identity**. Valid parameters are **refresh_token**, **password** and **identity**.
-client_id | string | **Required**. The client id registered for the application.
-client_secret | string | **Required**. The client secret registered for the application.
-`identity.provider` | string | **Required**. The identity provider id, valid value are **facebook**, **google** and **theclub**.
-`identity.access_token` | string | **Required**. Access token acquired from third party identity provider.
-`identity.third_party_id` | string | **Required**. The user id from third party identity provider.
-`identity.meta` | object | **Optional**. Meta data from third party idp.
-
-### Response Body
-
-Parameter | Type | Description
---------- | ---- | -----------
-access_token | string | Access token.
-refresh_token | string | Refresh token. Expires after one use.
-token_type | string | Token Type. Only **Bearer** is available.
-expires_in | string | Expiration time in seconds.
+<aside class="notice">
+See <a href="#third-party-identity-grant">Third Party Identity Grant</a>.
+</aside>
 
 ## Refresh Token
 
@@ -344,13 +285,13 @@ curl "https://membership-hktcare.webssup.com/oauth/register" \
 
 Create a new user.
 
+<aside class="notice">
+A verification code must be provided. To trigger the verification code process, use the <a href="#request-verification">Request Verification</a> endpoint.
+</aside>
+
 ### HTTP Request
 
 `POST /oauth/register`
-
-<aside class="notice">
-A verification code must be provided. To trigger the verification code process, use the <a href="verify-phone">Verify Phone</a> endpoint.
-</aside>
 
 
 ### Request Body
@@ -362,14 +303,59 @@ client_secret | string | **Required**. The client secret registered for the appl
 title | string | **Required**. The user's title, valid parameters are **mr** and **ms**.
 given_name | string | **Required**. The user's first name.
 family_name | string | **Required**. The user's last name.
-hkid | string | **Required**. The user's HKID.
+hkid | string | **Required**. The user's HKID. All letters must be converted to upper-case.
 email | object | **Required**. Holds the email info of the user
 `email.address` | string | **Required**. The user's email address
 phone | object | **Required**. Holds the contact number info of the user
 `phone.value` | string | **Required**. The user's contact number
-`phone.verification_code` | string | **Required**. The verification code sent by <a href="verify-phone">Verify Phone</a>.
+`phone.verification_code` | string | **Required**. The verification code sent by <a href="#request-verification">Request Verification</a>.
 password | string | **Required**. The user's password.
 password_confirmation | string | **Required**. The user's password confirmation.
+
+### Response Body
+
+<aside class="notice">
+This request has no response body.
+</aside>
+
+## Request Verification
+
+> To trigger a verification to be sent, use this code:
+
+```shell
+curl "https://membership-hktcare.webssup.com/oauth/verify" \
+  -X POST \
+  -d @request.json
+```
+
+> In request.json:
+
+```json
+{
+  "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
+  "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
+  "verification_type": "phone",
+  "phone": {
+    "value": "98456788"
+  }
+}
+```
+
+Request a verification code.
+
+### HTTP Request
+
+`POST /oauth/verify`
+
+### Request Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+client_id | string | **Required**. The client id registered for the application.
+client_secret | string | **Required**. The client secret registered for the application.
+verification_type | string | **Required**. Only **phone** is supported.
+phone | object | **Required**. Holds the contact number info of the user
+`phone.value` | string | **Required**. The user's contact number
 
 ### Response Body
 
@@ -415,7 +401,7 @@ Authorization | string | **Required**. Access token for identifying the user.
 
 Parameter | Type | Description
 --------- | ---- | -----------
-update_type | string | **Required**. Should be set to **profile**. Valid parameters are **password**, **phone** and **profile**.
+update_type | string | **Required**. Should be set to **profile**. Valid parameters are **password**, **phone**, **profile** and **user**.
 given_name | string | **Optional**. The user's first name.
 family_name | string | **Optional**. The user's last name.
 receive_promotions | string | **Optional**. Indicates where the user should receive promotional materials.
@@ -466,7 +452,7 @@ Authorization | string | **Required**. Access token for identifying the user.
 
 Parameter | Type | Description
 --------- | ---- | -----------
-update_type | string | **Required**. Should be set to **password**. Valid parameters are **password**, **phone** and **profile**.
+update_type | string | **Required**. Should be set to **password**. Valid parameters are **password**, **phone**, **profile** and **user**.
 password | object | **Required**. Holds the password info of the user.
 `password.old` | string | **Required**. Password currently in-used.
 `password.new` | string | **Required**. A new password to change to.
@@ -495,45 +481,21 @@ curl "https://membership-hktcare.webssup.com/oauth/update" \
 {
   "update_type": "phone",
   "phone": {
-    "value": "98456788"
-  }
-}
-```
-
-> After Providing a verification code:
-
-```shell
-curl "https://membership-hktcare.webssup.com/oauth/update" \
-  -X POST \
-  -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..." \
-  -d @request.json
-```
-
-> In request.json:
-
-```json
-{
-  "update_type": "phone",
-  "phone": {
     "value": "98456788",
-    "verification_code": "4865"
+    "verification_code": "4295"
   }
 }
 ```
 
 Update a existing user's phone.
 
+<aside class="notice">
+A verification code must be provided. To trigger the verification code process, use the <a href="#request-verification">Request Verification</a> endpoint.
+</aside>
+
 ### HTTP Request
 
 `POST /oauth/update`
-
-<aside class="notice">
-Calling this API endpoint without providing a verification code will trigger a code to be sent to the given phone number.
-<br>
-The verification code can also be triggered using <a href="verify-phone">Verify Phone</a> endpoint.
-<br>
-For the changes to be committed. A request should be sent with the verification code and the original payload. 
-</aside>
 
 ### Request Header
 
@@ -545,56 +507,10 @@ Authorization | string | **Required**. Access token for identifying the user.
 
 Parameter | Type | Description
 --------- | ---- | -----------
-update_type | string | **Required**. Should be set to **password**. Valid parameters are **password**, **phone** and **profile**.
+update_type | string | **Required**. Should be set to **password**. Valid parameters are **password**, **phone**, **profile** and **user**.
 phone | object | **Required**. Holds the contact number info of the user
 `phone.value` | string | **Required**. The user's contact number
-`phone.verification_code` | string | **Optional**. The verification code for the new contact no.
-
-### Response Body
-
-<aside class="notice">
-This request has no response body.
-</aside>
-
-
-## Verify Phone
-
-> To trigger a verification to be sent, use this code:
-
-```shell
-curl "https://membership-hktcare.webssup.com/oauth/verify" \
-  -X POST \
-  -d @request.json
-```
-
-> In request.json:
-
-```json
-{
-  "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
-  "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
-  "verification_type": "phone",
-  "phone": {
-    "value": "98456788"
-  }
-}
-```
-
-Request a verification code.
-
-### HTTP Request
-
-`POST /oauth/verify`
-
-### Request Body
-
-Parameter | Type | Description
---------- | ---- | -----------
-client_id | string | **Required**. The client id registered for the application.
-client_secret | string | **Required**. The client secret registered for the application.
-verification_type | string | **Required**. Should be set to **phone**. Valid parameters are **phone** and **email**.
-phone | object | **Required**. Holds the contact number info of the user
-`phone.value` | string | **Required**. The user's contact number
+`phone.verification_code` | string | **Required**. The verification code for the new contact no.
 
 ### Response Body
 
@@ -633,7 +549,10 @@ curl "https://membership-hktcare.webssup.com/oauth/userinfo" \
   "receive_promotion": false,
   "identities": [
     // Third Party Metadata
-    { ... },
+    {
+       "provider": "facebook",
+       "username": "Kate Chan"
+    },    
     { ... },
     { ... }
   ]
@@ -669,13 +588,82 @@ phone | object | Holds the contact number info of the user
 receive_promotion | boolean | Whether the user opted-out of promotional materials.
 identities | object[] | List of Third Party Identity Provider.
 
-## Update User
+## Update User Profile
 
 <aside class="notice">
 Refer to the <a href="#update-profile">Account Management Section</a>.
 </aside>
 
 # Third Party Identity Providers
+
+## Third Party Identity Grant
+
+<aside class="warning">
+Requesting Identity Grant with an unlinked identity will create an empty profile. See <a href="#update-empty-profile">Update Empty Profile</a>.
+</aside>
+
+> To request an access token with third party identity token, use this snippet:
+
+```shell
+curl "https://membership-hktcare.webssup.com/oauth/token" \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -d @request.json
+```
+
+> In request.json:
+
+```json
+{
+  "grant_type": "identity",
+  "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
+  "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
+  "identity": {
+    "provider": "facebook",
+    "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJh..."
+    "third_party_id": "2981827904",
+    "meta": {...} // Third Party Meta Infomation
+  }
+}
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJh...",
+  "refresh_token": "def50200831c0bf69f010244d2d381a2209e409b...",
+  "token_type": "Bearer",
+  "expires_in": 3708799
+}
+```
+
+This endpoint issue an access token with an provided third party identity token.
+
+### HTTP Request
+
+`POST /oauth/token`
+
+### Request Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+grant_type | string | **Required**. Should be set to **identity**. Valid parameters are **refresh_token**, **password** and **identity**.
+client_id | string | **Required**. The client id registered for the application.
+client_secret | string | **Required**. The client secret registered for the application.
+`identity.provider` | string | **Required**. The identity provider id, valid value are **facebook**, **google** and **theclub**.
+`identity.access_token` | string | **Required**. Access token acquired from third party identity provider.
+`identity.third_party_id` | string | **Required**. The user id from third party identity provider.
+`identity.meta` | object | **Optional**. Meta data from third party idp.
+
+### Response Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+access_token | string | Access token.
+refresh_token | string | Refresh token. Expires after one use.
+token_type | string | Token Type. Only **Bearer** is available.
+expires_in | string | Expiration time in seconds.
 
 ## Link Third Party Identity
 
@@ -720,6 +708,7 @@ Parameter | Type | Description
 --------- | ---- | -----------
 `identity.provider` | string | **Required**. The identity provider id, valid value are **facebook**, **google** and **theclub**.
 `identity.access_token` | string | **Required**. Access token acquired from third party idp.
+`identity.refresh_token` | string | **Required** if identity provider is **theclub**.
 `identity.third_party_id` | string | **Required**. Access token associated with third party idp.
 `identity.meta` | object | **Optional**. Meta data from third party idp.
 
@@ -927,14 +916,14 @@ curl "https://membership-hktcare.webssup.com/impersonate/b511c586-7d37-40a2-a6ac
 
 Impersonate a user.
 
+<aside class="notice">
+To access user related info, see <a href="#retreive-user-info">User Info</a> and <a href="#update-user">Update User</a>.<br>
+The access token granted has elevated scope. And can update user profile without verification code being provided.
+</aside>
+
 ### HTTP Request
 
 `GET /oauth/impersonate/:uuid`
-
-<aside class="notice">
-To access user related info, see <a href="#retreive-user-info">User Info</a> and <a href="#update-profile">Update Profile</a>.<br>
-The access token granted has elevated scope. And can update user profile without verification code being provided.
-</aside>
 
 ### Request Header
 
@@ -955,3 +944,111 @@ Parameter | Type | Description
 access_token | string | Access token.
 token_type | string | Token Type. Only **Bearer** is available.
 expires_in | string | Expiration time in seconds.
+
+## Update User
+
+> To update a existing user's password, use this code:
+
+```shell
+curl "https://membership-hktcare.webssup.com/oauth/update" \
+  -X POST \
+  -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..." \
+  -d @request.json
+```
+
+> In request.json:
+
+```json
+{
+  "update_type": "user",
+  "title": "ms",
+  "given_name": "Kate",
+  "family_name": "Chan",
+  "hkid": "A1234567",
+  "email": {
+    "address": "kate_chan@example.com"
+  },
+  "phone": {
+    "value": "91234567"
+  },
+  "receive_promotions": false
+}
+```
+
+Update a existing user's attributes.
+
+<aside class="notice">
+This request requires an access token with elevated scope, see <a href="#impersonate-user">Impersonate User</a>.
+</aside>
+
+### HTTP Request
+
+`POST /oauth/update`
+
+### Request Header
+
+Parameter | Type | Description
+--------- | ---- | -----------
+Authorization | string | **Required**. Access token for identifying the user.
+
+### Request Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+update_type | string | **Required**. Should be set to **user**. Valid parameters are **password**, **phone**, **profile** and **user**.
+title | string | **Optional**. The user's title, valid parameters are **mr** and **ms**.
+given_name | string | **Optional**. The user's first name.
+family_name | string | **Optional**. The user's last name.
+hkid | string | **Optional**. The user's HKID. All letters must be converted to upper-case.
+email | object | **Optional**. Holds the email info of the user
+`email.address` | string | **Optional**. The user's email address
+phone | object | **Optional**. Holds the contact number info of the user
+`phone.value` | string | **Optional**. The user's contact number
+receive_promotions | string | **Optional**. Indicates where the user should receive promotional materials.
+
+### Response Body
+
+<aside class="notice">
+This request has no response body.
+</aside>
+
+# Mobile Application API
+
+## Retrieve Configuration
+
+> To get the mobile app configuration, use this code: 
+
+```shell
+curl -X GET "https://membership-hktcare.webssup.com/configuration"
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+    "minVersionIOS": "1.0.0",
+    "minVersionAND": "1.0.0",
+    "appStatus": "0",
+    "appStatus_1_Message_en": "...",
+    "appStatus_1_Message_zh": "...",
+    "appStatus_2_Message_en": "...",
+    "appStatus_2_Message_zh": "...",
+    "appStatus_3_Message_en": "...",
+    "appStatus_3_Message_zh": "...",
+    "appStatusMessage_en": "...",
+    "appStatusMessage_zh": "..."
+}
+
+```
+
+This endpoint provide the mobile configuration set in CMS-Portal.
+
+### HTTP Request
+
+`GET /configuration`
+
+### Response Body
+
+<aside class="notice">
+The response is a dynamic json set in CMS-Portal.
+</aside>
