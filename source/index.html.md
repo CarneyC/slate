@@ -63,6 +63,7 @@ curl "https://membership-hktcare.webssup.com/oauth/token" \
   "grant_type": "password",
   "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
   "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
+  "recaptcha_token": "VskklmcAiwfs-gEhU...",
   "username": "kate_chan@example.com",
   "password": "yourStrong(!)Password"
 }
@@ -92,6 +93,7 @@ Parameter | Type | Description
 grant_type | string | **Required**. Should be set to **password**. Valid parameters are **refresh_token**, **password** and **identity**.
 client_id | string | **Required**. The client id registered for the application.
 client_secret | string | **Required**. The client secret registered for the application.
+recaptcha_token | string | **Optional**. Must be provided if recaptcha is enabled.
 username | string | **Required**
 password | string | **Required**
 
@@ -267,9 +269,11 @@ curl "https://membership-hktcare.webssup.com/oauth/register" \
 {
   "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
   "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
+  "recaptcha_token": "VskklmcAiwfs-gEhU...",
   "title": "ms",
   "given_name": "Kate",
   "family_name": "Chan",
+  "birthday": "07-11-1992",
   "hkid": "A1234567",
   "email": {
     "address": "kate_chan@example.com"
@@ -300,9 +304,11 @@ Parameter | Type | Description
 --------- | ---- | -----------
 client_id | string | **Required**. The client id registered for the application.
 client_secret | string | **Required**. The client secret registered for the application.
-title | string | **Required**. The user's title, valid parameters are **mr** and **ms**.
+recaptcha_token | string | **Optional**. Must be provided if recaptcha is enabled.
+title | string | **Required**. The user's title, valid parameters are **mr**, **ms** and **miss**.
 given_name | string | **Required**. The user's first name.
 family_name | string | **Required**. The user's last name.
+birthday | string | **Required**. The user's date of birth, must be in **YYYY-MM-DD** format.
 hkid | string | **Required**. The user's HKID. All letters must be converted to upper-case.
 email | object | **Required**. Holds the email info of the user
 `email.address` | string | **Required**. The user's email address
@@ -323,7 +329,7 @@ This request has no response body.
 > To trigger a verification to be sent, use this code:
 
 ```shell
-curl "https://membership-hktcare.webssup.com/oauth/verify" \
+curl "https://membership-hktcare.webssup.com/oauth/verify/request" \
   -X POST \
   -d @request.json
 ```
@@ -334,6 +340,7 @@ curl "https://membership-hktcare.webssup.com/oauth/verify" \
 {
   "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
   "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
+  "recaptcha_token": "VskklmcAiwfs-gEhU...",
   "verification_type": "phone",
   "phone": {
     "value": "98456788"
@@ -345,7 +352,7 @@ Request a verification code.
 
 ### HTTP Request
 
-`POST /oauth/verify`
+`POST /oauth/verify/request`
 
 ### Request Body
 
@@ -353,6 +360,7 @@ Parameter | Type | Description
 --------- | ---- | -----------
 client_id | string | **Required**. The client id registered for the application.
 client_secret | string | **Required**. The client secret registered for the application.
+recaptcha_token | string | **Optional**. Must be provided if recaptcha is enabled.
 verification_type | string | **Required**. Only **phone** is supported.
 phone | object | **Required**. Holds the contact number info of the user
 `phone.value` | string | **Required**. The user's contact number
@@ -361,6 +369,61 @@ phone | object | **Required**. Holds the contact number info of the user
 
 <aside class="notice">
 This request has no response body.
+</aside>
+
+## Verify
+
+> To verify a verification code, use this code:
+
+```shell
+curl "https://membership-hktcare.webssup.com/oauth/verify" \
+  -X POST \
+  -d @request.json
+```
+
+> In request.json:
+
+```json
+{
+  "verification_type": "phone",
+  "phone": {
+    "value": "98456788",
+    "verification_code": "8764"
+  }
+}
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "expires_in": 30
+}
+```
+
+Verify a verification code.
+
+### HTTP Request
+
+`POST /oauth/verify`
+
+### Request Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+verification_type | string | **Required**. Only **phone** is supported.
+phone | object | **Required**. Holds the contact number info of the user
+`phone.value` | string | **Required**. The user's contact number
+`phone.verification_cdoe` | string | **Required**. Verification Code.
+
+### Response Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+expires_in | number | Expiration time in seconds.
+
+<aside class="warning">
+A 400 Bad Request is returned if the given verification code is invalid.
 </aside>
 
 ## Update Profile
@@ -379,8 +442,6 @@ curl "https://membership-hktcare.webssup.com/oauth/update" \
 ```json
 {
   "update_type": "profile",
-  "given_name": "Kate",
-  "family_name": "Chan",
   "receive_promotions": false
 }
 ```
@@ -402,8 +463,6 @@ Authorization | string | **Required**. Access token for identifying the user.
 Parameter | Type | Description
 --------- | ---- | -----------
 update_type | string | **Required**. Should be set to **profile**. Valid parameters are **password**, **phone**, **profile** and **user**.
-given_name | string | **Optional**. The user's first name.
-family_name | string | **Optional**. The user's last name.
 receive_promotions | string | **Optional**. Indicates where the user should receive promotional materials.
 
 ### Response Body
@@ -537,6 +596,7 @@ curl "https://membership-hktcare.webssup.com/oauth/userinfo" \
   "title": "ms",
   "given_name": "Kate",
   "family_name": "Chan",
+  "birthday": "07-11-1992",
   "hkid": "A1234567",
   "email": {
     "address": "kate_chan@example.com",
@@ -575,9 +635,10 @@ Authorization | string | **Required**
 
 Parameter | Type | Description
 --------- | ---- | -----------
-title | string | The user's title, valid parameters are **mr** and **ms**.
+title | string | The user's title, valid parameters are **mr**, **ms** and **miss**.
 given_name | string | The user's first name.
 family_name | string | The user's last name.
+birthday | string | The user's date of birth, in **YYYY-MM-DD** format.
 hkid | string | The user's HKID.
 email | object | Holds the email info of the user
 `email.address` | string | The user's email address
@@ -598,10 +659,6 @@ Refer to the <a href="#update-profile">Account Management Section</a>.
 
 ## Third Party Identity Grant
 
-<aside class="warning">
-Requesting Identity Grant with an unlinked identity will create an empty profile. See <a href="#update-empty-profile">Update Empty Profile</a>.
-</aside>
-
 > To request an access token with third party identity token, use this snippet:
 
 ```shell
@@ -618,6 +675,7 @@ curl "https://membership-hktcare.webssup.com/oauth/token" \
   "grant_type": "identity",
   "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
   "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
+  "recaptcha_token": "VskklmcAiwfs-gEhU...",
   "identity": {
     "provider": "facebook",
     "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJh..."
@@ -651,6 +709,7 @@ Parameter | Type | Description
 grant_type | string | **Required**. Should be set to **identity**. Valid parameters are **refresh_token**, **password** and **identity**.
 client_id | string | **Required**. The client id registered for the application.
 client_secret | string | **Required**. The client secret registered for the application.
+recaptcha_token | string | **Optional**. Must be provided if recaptcha is enabled.
 `identity.provider` | string | **Required**. The identity provider id, valid value are **facebook**, **google** and **theclub**.
 `identity.access_token` | string | **Required**. Access token acquired from third party identity provider.
 `identity.third_party_id` | string | **Required**. The user id from third party identity provider.
@@ -718,6 +777,12 @@ Parameter | Type | Description
 This request has no response body.
 </aside>
 
+### Error Response Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+error | string | **user_not_found** or **invalid_credentials**.
+
 ## Remove Third Party Identity
 
 > To remove a link with Third Party Identity Provider, use this code:
@@ -763,7 +828,6 @@ Parameter | Type | Description
 <aside class="notice">
 This request has no response body.
 </aside>
-
 
 # Server-side API
 
@@ -964,6 +1028,7 @@ curl "https://membership-hktcare.webssup.com/oauth/update" \
   "title": "ms",
   "given_name": "Kate",
   "family_name": "Chan",
+  "birthday": "07-11-1992",
   "hkid": "A1234567",
   "email": {
     "address": "kate_chan@example.com"
@@ -996,9 +1061,10 @@ Authorization | string | **Required**. Access token for identifying the user.
 Parameter | Type | Description
 --------- | ---- | -----------
 update_type | string | **Required**. Should be set to **user**. Valid parameters are **password**, **phone**, **profile** and **user**.
-title | string | **Optional**. The user's title, valid parameters are **mr** and **ms**.
+title | string | **Optional**. The user's title, valid parameters are **mr**, **ms** and **miss**.
 given_name | string | **Optional**. The user's first name.
 family_name | string | **Optional**. The user's last name.
+birthday | string | **Required**. The user's date of birth, must be in **YYYY-MM-DD** format.
 hkid | string | **Optional**. The user's HKID. All letters must be converted to upper-case.
 email | object | **Optional**. Holds the email info of the user
 `email.address` | string | **Optional**. The user's email address
