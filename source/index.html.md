@@ -273,7 +273,7 @@ curl "https://membership-hktcare.webssup.com/oauth/register" \
   "title": "ms",
   "given_name": "Kate",
   "family_name": "Chan",
-  "birthday": "07-11-1992",
+  "birthday": "1992-07-11",
   "hkid": "A1234567",
   "email": {
     "address": "kate_chan@example.com"
@@ -341,7 +341,7 @@ curl "https://membership-hktcare.webssup.com/oauth/verify/request" \
   "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
   "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
   "recaptcha_token": "VskklmcAiwfs-gEhU...",
-  "verification_type": "phone",
+  "verification_type": "update_phone",
   "phone": {
     "value": "98456788"
   }
@@ -361,8 +361,10 @@ Parameter | Type | Description
 client_id | string | **Required**. The client id registered for the application.
 client_secret | string | **Required**. The client secret registered for the application.
 recaptcha_token | string | **Optional**. Must be provided if recaptcha is enabled.
-verification_type | string | **Required**. Only **phone** is supported.
-phone | object | **Required**. Holds the contact number info of the user
+verification_type | string | **Required**. Valid parameters are **update_phone** and **reset_password**.
+email | object | **Required** if verification_type is **reset_password**. Holds the email info of the user
+`email.address` | string |  **Required**. The user's email address
+phone | object | **Required** if verification_type is **update_phone**. Holds the contact number info of the user
 `phone.value` | string | **Required**. The user's contact number
 
 ### Response Body
@@ -385,7 +387,7 @@ curl "https://membership-hktcare.webssup.com/oauth/verify" \
 
 ```json
 {
-  "verification_type": "phone",
+  "verification_type": "update_phone",
   "phone": {
     "value": "98456788",
     "verification_code": "8764"
@@ -411,7 +413,7 @@ Verify a verification code.
 
 Parameter | Type | Description
 --------- | ---- | -----------
-verification_type | string | **Required**. Only **phone** is supported.
+verification_type | string | **Required**. Only **update_phone** is supported.
 phone | object | **Required**. Holds the contact number info of the user
 `phone.value` | string | **Required**. The user's contact number
 `phone.verification_cdoe` | string | **Required**. Verification Code.
@@ -462,8 +464,63 @@ Authorization | string | **Required**. Access token for identifying the user.
 
 Parameter | Type | Description
 --------- | ---- | -----------
-update_type | string | **Required**. Should be set to **profile**. Valid parameters are **password**, **phone**, **profile** and **user**.
+update_type | string | **Required**. Should be set to **profile**. 
 receive_promotions | string | **Optional**. Indicates where the user should receive promotional materials.
+
+### Response Body
+
+<aside class="notice">
+This request has no response body.
+</aside>
+
+## Reset Password
+
+> To update a existing user's password with a reset code, use this code:
+
+```shell
+curl "https://membership-hktcare.webssup.com/oauth/reset" \
+  -X POST \
+  -d @request.json
+```
+
+> In request.json:
+
+```json
+{
+  "reset_type": "password",
+  "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
+  "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
+  "email": {
+    "address": "janice.chan@gmail.com"
+  },
+  "password": {
+    "verification_code": "847240",
+    "new": "HkT2942",
+    "new_confirmation": "HkT2942"
+  }
+}
+```
+
+Update a existing user's password with reset code.
+
+### HTTP Request
+
+`POST /oauth/reset`
+
+### Request Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+reset_type | string | **Required**. Should be set to **password**. 
+client_id | string | **Required**. The client id registered for the application.
+client_secret | string | **Required**. The client secret registered for the application.
+email | object | **Optional**. Holds the email info of the user
+`email.address` | string | **Optional**. The user's email address
+phone | object | **Optional**. Holds the contact number info of the user
+`phone.value` | string | **Optional**. The user's contact number
+`password.verification_code` | string | **Required**. Verification Code.
+`password.new` | string | **Required**. A new password to change to.
+`password.new_confirmation` | string | **Required**. Confirmation for the new password.
 
 ### Response Body
 
@@ -511,7 +568,7 @@ Authorization | string | **Required**. Access token for identifying the user.
 
 Parameter | Type | Description
 --------- | ---- | -----------
-update_type | string | **Required**. Should be set to **password**. Valid parameters are **password**, **phone**, **profile** and **user**.
+update_type | string | **Required**. Should be set to **password**. 
 password | object | **Required**. Holds the password info of the user.
 `password.old` | string | **Required**. Password currently in-used.
 `password.new` | string | **Required**. A new password to change to.
@@ -566,7 +623,7 @@ Authorization | string | **Required**. Access token for identifying the user.
 
 Parameter | Type | Description
 --------- | ---- | -----------
-update_type | string | **Required**. Should be set to **password**. Valid parameters are **password**, **phone**, **profile** and **user**.
+update_type | string | **Required**. Should be set to **password**. 
 phone | object | **Required**. Holds the contact number info of the user
 `phone.value` | string | **Required**. The user's contact number
 `phone.verification_code` | string | **Required**. The verification code for the new contact no.
@@ -596,7 +653,7 @@ curl "https://membership-hktcare.webssup.com/oauth/userinfo" \
   "title": "ms",
   "given_name": "Kate",
   "family_name": "Chan",
-  "birthday": "07-11-1992",
+  "birthday": "1992-07-11",
   "hkid": "A1234567",
   "email": {
     "address": "kate_chan@example.com",
@@ -1028,7 +1085,7 @@ curl "https://membership-hktcare.webssup.com/oauth/update" \
   "title": "ms",
   "given_name": "Kate",
   "family_name": "Chan",
-  "birthday": "07-11-1992",
+  "birthday": "1992-07-11",
   "hkid": "A1234567",
   "email": {
     "address": "kate_chan@example.com"
@@ -1060,7 +1117,7 @@ Authorization | string | **Required**. Access token for identifying the user.
 
 Parameter | Type | Description
 --------- | ---- | -----------
-update_type | string | **Required**. Should be set to **user**. Valid parameters are **password**, **phone**, **profile** and **user**.
+update_type | string | **Required**. Should be set to **user**. 
 title | string | **Optional**. The user's title, valid parameters are **mr**, **ms** and **miss**.
 given_name | string | **Optional**. The user's first name.
 family_name | string | **Optional**. The user's last name.
