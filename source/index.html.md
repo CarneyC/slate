@@ -8,7 +8,7 @@ includes:
   - errors
   
 toc_footers:
-  - Updated on Dec 3, 2019
+  - Updated on Dec 6, 2019
 
 search: true
 ---
@@ -329,7 +329,7 @@ This request has no response body.
 > To trigger a verification to be sent, use this code:
 
 ```shell
-curl "https://membership-hktcare.webssup.com/oauth/verify/request" \
+curl "https://membership-hktcare.webssup.com/oauth/verify/request?lang=en" \
   -X POST \
   -d @request.json
 ```
@@ -354,6 +354,12 @@ Request a verification code.
 
 `POST /oauth/verify/request`
 
+### Query Parameters
+
+Parameter | Type | Description
+--------- | ---- | -----------
+lang | string | **Optional**. Language to generate error message / notifications in. Valid parameters are **en**, which is the default value, and **zh**.
+
 ### Request Body
 
 Parameter | Type | Description
@@ -373,7 +379,7 @@ phone | object | **Required** if verification_type is **update_phone**. Holds th
 This request has no response body.
 </aside>
 
-## Verify
+## Retrieve Verification Status
 
 > To verify a verification code, use this code:
 
@@ -428,6 +434,65 @@ expires_in | number | Expiration time in seconds.
 A 400 Bad Request is returned if the given verification code is invalid.
 </aside>
 
+## Reset Password
+
+> To update a existing user's password with a reset code, use this code:
+
+```shell
+curl "https://membership-hktcare.webssup.com/oauth/reset" \
+  -X POST \
+  -d @request.json
+```
+
+> In request.json:
+
+```json
+{
+  "reset_type": "password",
+  "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
+  "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
+  "email": {
+    "address": "janice.chan@gmail.com"
+  },
+  "password": {
+    "verification_code": "847240",
+    "new": "HkT2942",
+    "new_confirmation": "HkT2942"
+  }
+}
+```
+
+Update a existing user's password with a verification code.
+
+<aside class="notice">
+A verification code must be provided. To trigger the verification code process, use the <a href="#request-verification">Request Verification</a> endpoint.
+</aside>
+
+### HTTP Request
+
+`POST /oauth/reset`
+
+### Request Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+reset_type | string | **Required**. Should be set to **password**. 
+client_id | string | **Required**. The client id registered for the application.
+client_secret | string | **Required**. The client secret registered for the application.
+email | object | **Optional**. Holds the email info of the user
+`email.address` | string | **Optional**. The user's email address
+phone | object | **Optional**. Holds the contact number info of the user
+`phone.value` | string | **Optional**. The user's contact number
+`password.new` | string | **Optional**. A new password to change to.
+`password.new_confirmation` | string | **Optional**. Confirmation for the new password.
+`password.verification_code` | string | **Optional**. Verification Code.
+
+### Response Body
+
+<aside class="notice">
+This request has no response body.
+</aside>
+
 ## Update Profile
 
 > To update a existing user's password, use this code:
@@ -466,61 +531,6 @@ Parameter | Type | Description
 --------- | ---- | -----------
 update_type | string | **Required**. Should be set to **profile**. 
 receive_promotions | string | **Optional**. Indicates where the user should receive promotional materials.
-
-### Response Body
-
-<aside class="notice">
-This request has no response body.
-</aside>
-
-## Reset Password
-
-> To update a existing user's password with a reset code, use this code:
-
-```shell
-curl "https://membership-hktcare.webssup.com/oauth/reset" \
-  -X POST \
-  -d @request.json
-```
-
-> In request.json:
-
-```json
-{
-  "reset_type": "password",
-  "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
-  "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
-  "email": {
-    "address": "janice.chan@gmail.com"
-  },
-  "password": {
-    "verification_code": "847240",
-    "new": "HkT2942",
-    "new_confirmation": "HkT2942"
-  }
-}
-```
-
-Update a existing user's password with reset code.
-
-### HTTP Request
-
-`POST /oauth/reset`
-
-### Request Body
-
-Parameter | Type | Description
---------- | ---- | -----------
-reset_type | string | **Required**. Should be set to **password**. 
-client_id | string | **Required**. The client id registered for the application.
-client_secret | string | **Required**. The client secret registered for the application.
-email | object | **Optional**. Holds the email info of the user
-`email.address` | string | **Optional**. The user's email address
-phone | object | **Optional**. Holds the contact number info of the user
-`phone.value` | string | **Optional**. The user's contact number
-`password.verification_code` | string | **Required**. Verification Code.
-`password.new` | string | **Required**. A new password to change to.
-`password.new_confirmation` | string | **Required**. Confirmation for the new password.
 
 ### Response Body
 
@@ -712,6 +722,127 @@ identities | object[] | List of Third Party Identity Provider.
 Refer to the <a href="#update-profile">Account Management Section</a>.
 </aside>
 
+# Value-added Service Accounts
+
+## Activate Value-added Service
+
+> To activate a value-added service, use this code:
+
+```shell
+curl "https://membership-hktcare.webssup.com/oauth/link?lang=zh" \
+  -X POST \
+  -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..." \
+  -H "Content-Type: application/json" \
+  -d @request.json
+```
+
+> In request.json:
+
+```json
+{
+  "link_type": "code",
+  "identity": {
+    "provider": "vas",
+    "code": "MO24TS30B6RL0O",
+    "password": "A1231"
+  }
+}
+```
+
+This endpoint connects the user with a existing VAS account.
+
+### HTTP Request
+
+`POST /oauth/link`
+
+### Query Parameters
+
+Parameter | Type | Description
+--------- | ---- | -----------
+lang | string | **Optional**. Language to generate error message / notifications in. Valid parameters are **en**, which is the default value, and **zh**.
+
+### Request Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+link_type | string | **Required**. Should be set to **activation_code**.
+`identity.provider` | string | **Required**. Only **vas** is supported.
+`identity.code` | string | **Required**. The provided activation code.
+`identity.password` | string | **Required**. The provided password / verification code associated with the activation code.
+
+### Response Body
+
+<aside class="notice">
+This request has no response body.
+</aside>
+
+### Error Response Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+error | string | **invalid_credentials**.
+message | string | Human-readable error message returned by the connection provider.
+
+## Link Legacy Value-added Service Account
+
+> To link a existing VAS account, use this code:
+
+```shell
+curl "https://membership-hktcare.webssup.com/oauth/link?lang=zh" \
+  -X POST \
+  -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..." \
+  -H "Content-Type: application/json" \
+  -d @request.json
+```
+
+> In request.json:
+
+```json
+{
+  "link_type": "password",
+  "identity": {
+    "provider": "vas",
+    "username": "evaso711",
+    "password": "Secretive(!)Password"
+  }
+}
+```
+
+This endpoint links the user with a existing VAS account.
+
+### HTTP Request
+
+`POST /oauth/link`
+
+### Query Parameters
+
+Parameter | Type | Description
+--------- | ---- | -----------
+lang | string | **Optional**. Language to generate error message / notifications in. Valid parameters are **en**, which is the default value, and **zh**.
+
+### Request Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+link_type | string | **Required**. Should be set to **password**.
+`identity.provider` | string | **Required**. Only **vas** is supported.
+`identity.username` | string | **Required**. The legacy VAS account's username.
+`identity.password` | string | **Required**. The legacy VAS account's password.
+
+### Response Body
+
+<aside class="notice">
+This request has no response body.
+</aside>
+
+### Error Response Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+error | string | **invalid_credentials**.
+message | string | Human-readable error message returned by the connection provider.
+hint | string | Human-readable error message returned by the connection provider.
+
 # Third Party Identity Providers
 
 ## Third Party Identity Grant
@@ -797,6 +928,7 @@ curl "https://membership-hktcare.webssup.com/oauth/link" \
 
 ```json
 {
+  "link_type": "token",
   "identity": {
     "provider": "facebook",
     "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJh..."
@@ -806,7 +938,7 @@ curl "https://membership-hktcare.webssup.com/oauth/link" \
 }
 ```
 
-This endpoint links an existing account with a third party identity provider.
+This endpoint links the user with a third party identity.
 
 ### HTTP Request
 
@@ -822,6 +954,7 @@ Authorization | string | **Required**
 
 Parameter | Type | Description
 --------- | ---- | -----------
+link_type | string | **Optional**. Should be set to **token**.
 `identity.provider` | string | **Required**. The identity provider id, valid value are **facebook**, **google** and **theclub**.
 `identity.access_token` | string | **Required**. Access token acquired from third party idp.
 `identity.refresh_token` | string | **Required** if identity provider is **theclub**.
@@ -862,7 +995,7 @@ curl "https://membership-hktcare.webssup.com/oauth/unlink" \
 }
 ```
 
-This endpoint removes an existing account's link with a third party identity provider.
+This endpoint removes the user's link with a third party identity provider.
 
 ### HTTP Request
 
