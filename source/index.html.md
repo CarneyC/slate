@@ -8,7 +8,7 @@ includes:
   - errors
   
 toc_footers:
-  - Updated on Dec 6, 2019
+  - Updated on Dec 9, 2019
 
 search: true
 ---
@@ -843,6 +843,71 @@ error | string | **invalid_credentials**.
 message | string | Human-readable error message returned by the connection provider.
 hint | string | Human-readable error message returned by the connection provider.
 
+## List Value-added Services
+
+> To get an user's vas entries, use this code:
+
+```shell
+curl "https://membership-hktcare.webssup.com/oauth/vas/list" \
+  -X GET \
+  -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..."
+```
+
+> The above command returns JSON structured like this:
+
+```json
+[
+  {
+    "plan_day": 60,
+    "remaining_credits": 0,
+    "contract_end_date": "2021-03-04",
+    "purchase_records": [
+      {
+        "plan": "B",
+        "total_day": 59,
+        "total_traveler": 1,
+        "request_no": "RQTT01095",
+        "policy_no": "73TT001001",
+        "created_at": "2019-09-25",
+        "commencement_date": "2019-09-25",
+        "expiry_date": "2019-11-22"
+      },
+      ...
+    ]
+  },
+  ...
+]
+```
+
+Get an user's vas subscriptions.
+
+### HTTP Request
+
+`GET /oauth/vas/list`
+
+### Request Header
+
+Parameter | Type | Description
+--------- | ---- | -----------
+Authorization | string | **Required**
+
+### Response Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+plan_day | int | Plan Day
+remaining_credits | int | Remaining Credits
+contract_end_date | date | Contract End Date, in **YYYY-MM-DD**.
+purchase_records | object[] | TravelCare purchases made under the subscription.
+`purchase_records[].plan` | string | Purchase plan type, valid values are **A** and **B**
+`purchase_records[].total_day` | int | Total Day.
+`purchase_records[].total_traveler` | int | Total Traveler.
+`purchase_records[].request_no` | string | Request Number.
+`purchase_records[].policy_no` | string | Policy Number.
+`purchase_records[].created_at` | date | Purchase Creation Date, in **YYYY-MM-DD**.
+`purchase_records[].commencement_date` | date | Contract Start Date, in **YYYY-MM-DD**.
+`purchase_records[].expiry_date` | date | Contract Expiry Date, in **YYYY-MM-DD**.
+
 # Third Party Identity Providers
 
 ## Third Party Identity Grant
@@ -1269,6 +1334,194 @@ This request has no response body.
 </aside>
 
 # Mobile Application API
+
+## Create Device Identity
+
+> To create a device-id entry without logging in, use this code: 
+
+```shell
+curl "https://membership-hktcare.webssup.com/oauth/device/create" \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -d @request.json
+```
+
+> In request.json:
+
+```json
+{
+  "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
+  "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
+  "device_id": "5b737ca6-a4c7–488e-b928–8452960c4be9"
+}
+```
+
+This endpoint create a device id entry without a logged in user.
+
+### HTTP Request
+
+`POST /oauth/device/create`
+
+### Request Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+client_id | string | **Required**. The client id registered for the application.
+client_secret | string | **Required**. The client secret registered for the application.
+device_id | string | **Required**. The device id.
+
+### Response Body
+
+<aside class="notice">
+This request has no response body.
+</aside>
+
+## Link Device Identity
+
+> To link a device-id with the logged-in user, use this code: 
+
+```shell
+curl "https://membership-hktcare.webssup.com/oauth/device/create" \
+  -X POST \
+  -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..." \
+  -H "Content-Type: application/json" \
+  -d @request.json
+```
+
+> In request.json:
+
+```json
+{
+  "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
+  "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
+  "device_id": "5b737ca6-a4c7–488e-b928–8452960c4be9"
+}
+```
+
+This endpoint link a device id with a user.
+
+<aside class="notice">
+This request <strong>DOES NOT</strong> require a device identity be created preemptively.
+</aside>
+
+### HTTP Request
+
+`POST /oauth/device/link`
+
+### Request Header
+
+Parameter | Type | Description
+--------- | ---- | -----------
+Authorization | string | **Required**. Access token for identifying the user.
+
+### Request Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+client_id | string | **Required**. The client id registered for the application.
+client_secret | string | **Required**. The client secret registered for the application.
+device_id | string | **Required**. The device id.
+
+### Response Body
+
+<aside class="notice">
+This request has no response body.
+</aside>
+
+
+## Delete Device Identity
+
+> To remove a device-id, use this code: 
+
+```shell
+curl "https://membership-hktcare.webssup.com/oauth/device/delete" \
+  -X POST \
+  -H "Content-Type: application/json" \
+  -d @request.json
+```
+
+> In request.json:
+
+```json
+{
+  "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
+  "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
+  "device_id": "5b737ca6-a4c7–488e-b928–8452960c4be9"
+}
+```
+
+This endpoint deletes a device id entry.
+
+### HTTP Request
+
+`POST /oauth/device/delete`
+
+### Request Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+client_id | string | **Required**. The client id registered for the application.
+client_secret | string | **Required**. The client secret registered for the application.
+device_id | string | **Required**. The device id.
+
+### Response Body
+
+<aside class="notice">
+This request has no response body.
+</aside>
+
+## List Device Identities
+
+> To get a list of device identities, use this code: 
+
+```shell
+curl "https://membership-hktcare.webssup.com/oauth/device/list" \
+  -X GET \
+  -H "Content-Type: application/json" \
+  -d @request.json
+```
+
+> In request.json:
+
+```json
+{
+  "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
+  "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
+}
+```
+
+> The above command returns JSON structured like this:
+
+```json
+[
+  {
+    "device_id": "dd8b47f7-be97-4ad0-8c4b-7a6cd4b4c9c6"
+  },
+  {
+    "device_id": "9e746884-0d9f-400b-8081-e7be92bd4502"
+  },
+  ...  
+]
+```
+
+This endpoint list all device identities.
+
+### HTTP Request
+
+`GET /oauth/device/list`
+
+### Request Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+client_id | string | **Required**. The client id registered for the application.
+client_secret | string | **Required**. The client secret registered for the application.
+
+### Response Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+device_id | string | Registered Device Identity.
 
 ## Retrieve Configuration
 
