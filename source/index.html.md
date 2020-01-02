@@ -8,7 +8,7 @@ includes:
   - errors
   
 toc_footers:
-  - Updated on Dec 9, 2019
+  - Updated on Dec 16, 2019
 
 search: true
 ---
@@ -210,7 +210,7 @@ Get meta information related to a token.
 
 Parameter | Type | Description
 --------- | ---- | -----------
-Authorization | string | **Required**
+Authorization | string | **Required**. Must be follow the format ``Bearer access_token``
 
 ### Response Body
 
@@ -237,13 +237,13 @@ Revoke an existing access token and its associated refresh token.
 
 ### HTTP Request
 
-`GET /oauth/revoke`
+`POST /oauth/revoke`
 
 ### Request Header
 
 Parameter | Type | Description
 --------- | ---- | -----------
-Authorization | string | **Required**
+Authorization | string | **Required**. Must be follow the format ``Bearer access_token``
 
 ### Response Body
 
@@ -297,7 +297,6 @@ A verification code must be provided. To trigger the verification code process, 
 
 `POST /oauth/register`
 
-
 ### Request Body
 
 Parameter | Type | Description
@@ -324,6 +323,238 @@ password_confirmation | string | **Required**. The user's password confirmation.
 This request has no response body.
 </aside>
 
+## Reset Password
+
+> To update a existing user's password with a reset code, use this code:
+
+```shell
+curl "https://membership-hktcare.webssup.com/oauth/reset" \
+  -X POST \
+  -d @request.json
+```
+
+> In request.json for Password Reset via Email:
+
+```json
+{
+  "reset_type": "password",
+  "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
+  "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
+  "email": {
+    "address": "janice.chan@gmail.com"
+  },
+  "password": {
+    "verification_code": "847240",
+    "new": "HkT2942",
+    "new_confirmation": "HkT2942"
+  }
+}
+```
+
+> In request.json for Password Reset via Phone:
+
+```json
+{
+  "reset_type": "password",
+  "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
+  "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
+  "hkid": "A1234567",
+  "phone": {
+    "value": "98765432"
+  },
+  "password": {
+    "verification_code": "847240",
+    "new": "HkT2942",
+    "new_confirmation": "HkT2942"
+  }
+}
+```
+
+Update a existing user's password with a verification code.
+
+<aside class="notice">
+A verification code must be provided. To trigger the verification code process, use the <a href="#request-verification">Request Verification</a> endpoint.
+</aside>
+
+### HTTP Request
+
+`POST /oauth/reset`
+
+### Request Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+reset_type | string | **Required**. Should be set to **password**. 
+client_id | string | **Required**. The client id registered for the application.
+client_secret | string | **Required**. The client secret registered for the application.
+email | object | **Optional**. Holds the email info of the user
+`email.address` | string | **Optional**. The user's email address
+hkid | string | **Required** if resetting via text message.
+phone | object | **Optional**. Holds the contact number info of the user
+`phone.value` | string | **Optional**. The user's contact number
+`password.new` | string | **Optional**. A new password to change to.
+`password.new_confirmation` | string | **Optional**. Confirmation for the new password.
+`password.verification_code` | string | **Optional**. Verification Code.
+
+### Response Body
+
+<aside class="notice">
+This request has no response body.
+</aside>
+
+## Update Profile
+
+> To update a existing user's password, use this code:
+
+```shell
+curl "https://membership-hktcare.webssup.com/oauth/update" \
+  -X POST \
+  -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..." \
+  -d @request.json
+```
+
+> In request.json:
+
+```json
+{
+  "update_type": "profile",
+  "receive_promotions": false
+}
+```
+
+Update a existing user's profile.
+
+### HTTP Request
+
+`POST /oauth/update`
+
+### Request Header
+
+Parameter | Type | Description
+--------- | ---- | -----------
+Authorization | string | **Required**. Must be follow the format ``Bearer access_token``
+
+### Request Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+update_type | string | **Required**. Should be set to **profile**. 
+receive_promotions | string | **Optional**. Indicates where the user should receive promotional materials.
+
+### Response Body
+
+<aside class="notice">
+This request has no response body.
+</aside>
+
+## Update Password
+
+> To update a existing user's password, use this code:
+
+```shell
+curl "https://membership-hktcare.webssup.com/oauth/update" \
+  -X POST \
+  -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..." \
+  -d @request.json
+```
+
+> In request.json:
+
+```json
+{
+  "update_type": "password",
+  "password": {
+    "old": "12345678",
+    "new": "25846901",
+    "new_confirmation": "25846901"
+  }
+}
+```
+
+Update a existing user's password.
+
+### HTTP Request
+
+`POST /oauth/update`
+
+### Request Header
+
+Parameter | Type | Description
+--------- | ---- | -----------
+Authorization | string | **Required**. Must be follow the format ``Bearer access_token``
+
+### Request Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+update_type | string | **Required**. Should be set to **password**. 
+password | object | **Required**. Holds the password info of the user.
+`password.old` | string | **Required**. Password currently in-used.
+`password.new` | string | **Required**. A new password to change to.
+`password.new_confirmation` | string | **Required**. Confirmation for the new password.
+
+### Response Body
+
+<aside class="notice">
+This request has no response body.
+</aside>
+
+## Update Phone
+
+> To update a existing user's phone, use this code:
+
+```shell
+curl "https://membership-hktcare.webssup.com/oauth/update" \
+  -X POST \
+  -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..." \
+  -d @request.json
+```
+
+> In request.json:
+
+```json
+{
+  "update_type": "phone",
+  "phone": {
+    "value": "98456788",
+    "verification_code": "4295"
+  }
+}
+```
+
+Update a existing user's phone.
+
+<aside class="notice">
+A verification code must be provided. To trigger the verification code process, use the <a href="#request-verification">Request Verification</a> endpoint.
+</aside>
+
+### HTTP Request
+
+`POST /oauth/update`
+
+### Request Header
+
+Parameter | Type | Description
+--------- | ---- | -----------
+Authorization | string | **Required**. Must be follow the format ``Bearer access_token``
+
+### Request Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+update_type | string | **Required**. Should be set to **password**. 
+phone | object | **Required**. Holds the contact number info of the user
+`phone.value` | string | **Required**. The user's contact number
+`phone.verification_code` | string | **Required**. The verification code for the new contact no.
+
+### Response Body
+
+<aside class="notice">
+This request has no response body.
+</aside>
+
+# Verifications
+
 ## Request Verification
 
 > To trigger a verification to be sent, use this code:
@@ -334,7 +565,7 @@ curl "https://membership-hktcare.webssup.com/oauth/verify/request?lang=en" \
   -d @request.json
 ```
 
-> In request.json:
+> For updating phone, in request.json:
 
 ```json
 {
@@ -344,6 +575,20 @@ curl "https://membership-hktcare.webssup.com/oauth/verify/request?lang=en" \
   "verification_type": "update_phone",
   "phone": {
     "value": "98456788"
+  }
+}
+```
+
+> Or for resetting password, in request.json:
+
+```json
+{
+  "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
+  "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
+  "recaptcha_token": "VskklmcAiwfs-gEhU...",
+  "verification_type": "reset_password",
+  "email": {
+    "address": "eva.so@gmail.com"
   }
 }
 ```
@@ -370,7 +615,8 @@ recaptcha_token | string | **Optional**. Must be provided if recaptcha is enable
 verification_type | string | **Required**. Valid parameters are **update_phone** and **reset_password**.
 email | object | **Required** if verification_type is **reset_password**. Holds the email info of the user
 `email.address` | string |  **Required**. The user's email address
-phone | object | **Required** if verification_type is **update_phone**. Holds the contact number info of the user
+hkid | object | **Required** if verification_type is **reset_password** via text message. Holds the HKID of the user
+phone | object | **Required** if verification_type is **update_phone** or **reset_password** via text message. Holds the contact number info of the user
 `phone.value` | string | **Required**. The user's contact number
 
 ### Response Body
@@ -431,222 +677,57 @@ Parameter | Type | Description
 expires_in | number | Expiration time in seconds.
 
 <aside class="warning">
-A 400 Bad Request is returned if the given verification code is invalid.
+A <strong>400 Bad Request</strong> is returned if the given verification code is invalid.
 </aside>
 
-## Reset Password
-
-> To update a existing user's password with a reset code, use this code:
-
-```shell
-curl "https://membership-hktcare.webssup.com/oauth/reset" \
-  -X POST \
-  -d @request.json
-```
-
-> In request.json:
-
-```json
-{
-  "reset_type": "password",
-  "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
-  "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
-  "email": {
-    "address": "janice.chan@gmail.com"
-  },
-  "password": {
-    "verification_code": "847240",
-    "new": "HkT2942",
-    "new_confirmation": "HkT2942"
-  }
-}
-```
-
-Update a existing user's password with a verification code.
-
-<aside class="notice">
-A verification code must be provided. To trigger the verification code process, use the <a href="#request-verification">Request Verification</a> endpoint.
-</aside>
-
-### HTTP Request
-
-`POST /oauth/reset`
-
-### Request Body
-
-Parameter | Type | Description
---------- | ---- | -----------
-reset_type | string | **Required**. Should be set to **password**. 
-client_id | string | **Required**. The client id registered for the application.
-client_secret | string | **Required**. The client secret registered for the application.
-email | object | **Optional**. Holds the email info of the user
-`email.address` | string | **Optional**. The user's email address
-phone | object | **Optional**. Holds the contact number info of the user
-`phone.value` | string | **Optional**. The user's contact number
-`password.new` | string | **Optional**. A new password to change to.
-`password.new_confirmation` | string | **Optional**. Confirmation for the new password.
-`password.verification_code` | string | **Optional**. Verification Code.
-
-### Response Body
-
-<aside class="notice">
-This request has no response body.
-</aside>
-
-## Update Profile
-
-> To update a existing user's password, use this code:
-
-```shell
-curl "https://membership-hktcare.webssup.com/oauth/update" \
-  -X POST \
-  -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..." \
-  -d @request.json
-```
-
-> In request.json:
-
-```json
-{
-  "update_type": "profile",
-  "receive_promotions": false
-}
-```
-
-Update a existing user's profile.
-
-### HTTP Request
-
-`POST /oauth/update`
-
-### Request Header
-
-Parameter | Type | Description
---------- | ---- | -----------
-Authorization | string | **Required**. Access token for identifying the user.
-
-### Request Body
-
-Parameter | Type | Description
---------- | ---- | -----------
-update_type | string | **Required**. Should be set to **profile**. 
-receive_promotions | string | **Optional**. Indicates where the user should receive promotional materials.
-
-### Response Body
-
-<aside class="notice">
-This request has no response body.
-</aside>
-
-## Update Password
-
-> To update a existing user's password, use this code:
-
-```shell
-curl "https://membership-hktcare.webssup.com/oauth/update" \
-  -X POST \
-  -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..." \
-  -d @request.json
-```
-
-> In request.json:
-
-```json
-{
-  "update_type": "password",
-  "password": {
-    "old": "12345678",
-    "new": "25846901",
-    "new_confirmation": "25846901"
-  }
-}
-```
-
-Update a existing user's password.
-
-### HTTP Request
-
-`POST /oauth/update`
-
-### Request Header
-
-Parameter | Type | Description
---------- | ---- | -----------
-Authorization | string | **Required**. Access token for identifying the user.
-
-### Request Body
-
-Parameter | Type | Description
---------- | ---- | -----------
-update_type | string | **Required**. Should be set to **password**. 
-password | object | **Required**. Holds the password info of the user.
-`password.old` | string | **Required**. Password currently in-used.
-`password.new` | string | **Required**. A new password to change to.
-`password.new_confirmation` | string | **Required**. Confirmation for the new password.
-
-### Response Body
-
-<aside class="notice">
-This request has no response body.
-</aside>
-
-## Update Phone
-
-> To update a existing user's phone, use this code:
-
-```shell
-curl "https://membership-hktcare.webssup.com/oauth/update" \
-  -X POST \
-  -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..." \
-  -d @request.json
-```
-
-> In request.json:
-
-```json
-{
-  "update_type": "phone",
-  "phone": {
-    "value": "98456788",
-    "verification_code": "4295"
-  }
-}
-```
-
-Update a existing user's phone.
-
-<aside class="notice">
-A verification code must be provided. To trigger the verification code process, use the <a href="#request-verification">Request Verification</a> endpoint.
-</aside>
-
-### HTTP Request
-
-`POST /oauth/update`
-
-### Request Header
-
-Parameter | Type | Description
---------- | ---- | -----------
-Authorization | string | **Required**. Access token for identifying the user.
-
-### Request Body
-
-Parameter | Type | Description
---------- | ---- | -----------
-update_type | string | **Required**. Should be set to **password**. 
-phone | object | **Required**. Holds the contact number info of the user
-`phone.value` | string | **Required**. The user's contact number
-`phone.verification_code` | string | **Required**. The verification code for the new contact no.
-
-### Response Body
-
-<aside class="notice">
-This request has no response body.
-</aside>
 
 # User Profile
 
-## Retrieve User Info
+## Retrieve Basic User Profile
+
+> To get an user's profile information, use this code:
+
+```shell
+curl "https://membership-hktcare.webssup.com/oauth/me" \
+  -X GET \
+  -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..."
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "uuid": "432eaa8f-7790-49e0-be9f-38b35726922c",
+  "title": "ms",
+  "given_name": "Kate",
+  "family_name": "Chan",
+  "theclub_points": null
+}
+```
+
+Get basic user information.
+
+### HTTP Request
+
+`GET /oauth/me`
+
+### Request Header
+
+Parameter | Type | Description
+--------- | ---- | -----------
+Authorization | string | **Required**. Must be follow the format ``Bearer access_token``
+
+### Response Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+uuid | string | UUID used for accessing individual vas entry.
+title | string | The user's title, valid parameters are **mr**, **ms** and **miss**.
+given_name | string | The user's first name.
+family_name | string | The user's last name.
+theclub_points | int | TheClub point balance, default to **null** if TheClub has not been linked or TheClub server cannot be reached.
+
+## Retrieve Complete User Profile
 
 > To get an user's profile information, use this code:
 
@@ -660,6 +741,7 @@ curl "https://membership-hktcare.webssup.com/oauth/userinfo" \
 
 ```json
 {
+  "uuid": "432eaa8f-7790-49e0-be9f-38b35726922c",
   "title": "ms",
   "given_name": "Kate",
   "family_name": "Chan",
@@ -674,6 +756,7 @@ curl "https://membership-hktcare.webssup.com/oauth/userinfo" \
     "verified": true
   },
   "receive_promotion": false,
+  "theclub_points": null,
   "identities": [
     // Third Party Metadata
     {
@@ -696,12 +779,13 @@ Get user profile information.
 
 Parameter | Type | Description
 --------- | ---- | -----------
-Authorization | string | **Required**
+Authorization | string | **Required**. Must be follow the format ``Bearer access_token``
 
 ### Response Body
 
 Parameter | Type | Description
 --------- | ---- | -----------
+uuid | string | UUID used for accessing individual vas entry.
 title | string | The user's title, valid parameters are **mr**, **ms** and **miss**.
 given_name | string | The user's first name.
 family_name | string | The user's last name.
@@ -714,13 +798,236 @@ phone | object | Holds the contact number info of the user
 `phone.value` | string | The user's contact number
 `phone.verified` | boolean | Indicates if the user-supplied contact number has been verified.
 receive_promotion | boolean | Whether the user opted-out of promotional materials.
+theclub_points | int | TheClub point balance, default to **null** if TheClub has not been linked or TheClub server cannot be reached.
 identities | object[] | List of Third Party Identity Provider.
 
 ## Update User Profile
 
 <aside class="notice">
+Refer to the <a href="#list-value-added-services">List Value-added Services</a>.
+</aside>
+
+## List VAS Entries
+
+<aside class="notice">
 Refer to the <a href="#update-profile">Account Management Section</a>.
 </aside>
+
+## List First-Party Plans
+
+<aside class="notice">
+Refer to the <a href="#list-iguard-plans">First-Party Plans</a>.
+</aside>
+
+# First-Party Plans
+
+## List iGuard Plans
+
+> To get an user's iGuard plans, use this code:
+
+```shell
+curl "https://membership-hktcare.webssup.com/oauth/plans/list?provider=iguard" \
+  -X GET \
+  -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..."
+```
+
+> The above command returns JSON structured like this:
+
+```json
+[
+  {
+    "provider": "iguard",
+    "details": {
+      "registration_date": "2018-02-03",
+      "imei": "355819083203335",
+      "model": "10.5 IPAD PRO WIFI+ CELL 64GB ",
+      "purchase_price": null,
+      ...
+    }
+  },
+  ...
+]
+```
+
+Get an user's external plans.
+
+### HTTP Request
+
+`GET /oauth/plans/list`
+
+### Query Parameters
+
+Parameter | Type | Description
+--------- | ---- | -----------
+provider | string | **Optional**. Should be set to **iguard**. Indicates which provider's entries to display, all entries are returned if none specified.
+
+### Request Header
+
+Parameter | Type | Description
+--------- | ---- | -----------
+Authorization | string | **Required**. Must be follow the format ``Bearer access_token``
+
+### Response Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+provider | int | Plan provider.
+`details.registration_date` | date | Plan RegistrationDate, in **YYYY-MM-DD**.
+`details.imei` | string | Device ID.
+`details.model` | string | Device Model.
+`details.purchase_price` | ?string | **Nullable**, Purchase Price.
+
+<aside class="notice">
+The response body might contains additional plan information.
+</aside>
+
+## List EasyHealth Plans
+
+> To get an user's EasyHealth plans, use this code:
+
+```shell
+curl "https://membership-hktcare.webssup.com/oauth/plans/list?provider=easyhealth" \
+  -X GET \
+  -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..."
+```
+
+> The above command returns JSON structured like this:
+
+```json
+[
+  {
+    "provider": "easyhealth",
+    "details": {
+      "policy_no": "19xxxxxx",
+      "policy_effdate": "2019-01-31",
+      "ph_name_prefix": "MR",
+      "ph_last_name": "CHAN",
+      "ph_first_name": "TAI MAN",
+      "phhkid": null,
+      "paymenttype": "DDA",
+      "modal_premium": 914,
+      "policy_status": "Premium paying",
+      "pi_name_prefix": "MR",
+      "pi_last_name": "CHAN",
+      "pi_first_name": "TAI MAN",
+      "ph_lastchange": "only shows when change PH or PI",
+      "pi_lastchange": null,
+      "pi_hkid": null,
+      "billing_freq": 12,
+      "benefit_level": "Plan 1",
+      "policy_infdate": "2019-02-15",
+      ...
+    },
+  },
+  ...
+]
+```
+
+Get an user's external plans.
+
+### HTTP Request
+
+`GET /oauth/plans/list`
+
+### Query Parameters
+
+Parameter | Type | Description
+--------- | ---- | -----------
+provider | string | **Optional**. Should be set to **easyhealth**. Indicates which provider's entries to display, all entries are returned if none specified.
+
+### Request Header
+
+Parameter | Type | Description
+--------- | ---- | -----------
+Authorization | string | **Required**. Must be follow the format ``Bearer access_token``
+
+### Response Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+provider | int | Plan provider.
+`details.policy_no` | string | Policy Number
+`details.policy_effdate` | string | Policy Effective Date
+`details.ph_name_prefix` | string | Primary HolderName Prefix
+`details.ph_last_name` | string | Primary HolderLast Name
+`details.ph_first_name` | string | Primary HolderFirst Name
+`details.phhkid` | string | Primary HolderHKID
+`details.paymenttype` | string | Payment Type
+`details.modal_premium` | string | Model Premium
+`details.policy_status` | string | Policy Status
+`details.pi_name_prefix` | string | Person Insured Name Prefix
+`details.pi_last_name` | string | Person Insured Last Name
+`details.pi_first_name` | string | Person Insured First Name
+`details.ph_lastchange` | string | Primary HolderLast change
+`details.pi_lastchange` | string | Person Insured Last Change
+`details.pi_hkid` | string | Person Insured HKID
+`details.billing_freq` | int | Billing Frequency
+`details.benefit_level` | string | Benefit Level
+`details.policy_infdate` | date | Policy Inf Date
+
+<aside class="notice">
+The response body might contains additional plan information.
+</aside>
+
+# TravelCare Purchase Records
+
+## Link Purchase Records
+
+> To link with a Third Party Identity Provider, use this code:
+
+```shell
+curl "https://membership-hktcare.webssup.com/oauth/link" \
+  -X POST \
+  -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..." \
+  -H "Content-Type: application/json" \
+  -d @request.json
+```
+
+> In request.json:
+
+```json
+{
+  "link_type": "token",
+  "identity": {
+    "provider": "travelcare",
+    "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJh..."
+    "third_party_id": "4",
+  }
+}
+```
+
+This endpoint links the user with a travelcare purchase record.
+
+### HTTP Request
+
+`POST /oauth/link`
+
+### Request Header
+
+Parameter | Type | Description
+--------- | ---- | -----------
+Authorization | string | **Required**. Must be follow the format ``Bearer access_token``
+
+### Request Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+link_type | string | **Optional**. Should be set to **token**.
+`identity.provider` | string | **Required**. Should be set to **travelcare**.
+`identity.access_token` | string | **Required**. Access token generated by HKTCare.
+`identity.third_party_id` | string | **Required**. Purchase id.
+
+### Response Body
+
+<aside class="notice">
+This request has no response body.
+</aside>
+
+### Error Response Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+error | string | **user_not_found** or **invalid_credentials**.
 
 # Value-added Service Accounts
 
@@ -755,6 +1062,12 @@ This endpoint connects the user with a existing VAS account.
 
 `POST /oauth/link`
 
+### Request Header
+
+Parameter | Type | Description
+--------- | ---- | -----------
+Authorization | string | **Required**. Must be follow the format ``Bearer access_token``
+
 ### Query Parameters
 
 Parameter | Type | Description
@@ -765,7 +1078,7 @@ lang | string | **Optional**. Language to generate error message / notifications
 
 Parameter | Type | Description
 --------- | ---- | -----------
-link_type | string | **Required**. Should be set to **activation_code**.
+link_type | string | **Required**. Should be set to **code**.
 `identity.provider` | string | **Required**. Only **vas** is supported.
 `identity.code` | string | **Required**. The provided activation code.
 `identity.password` | string | **Required**. The provided password / verification code associated with the activation code.
@@ -814,6 +1127,12 @@ This endpoint links the user with a existing VAS account.
 
 `POST /oauth/link`
 
+### Request Header
+
+Parameter | Type | Description
+--------- | ---- | -----------
+Authorization | string | **Required**. Must be follow the format ``Bearer access_token``
+
 ### Query Parameters
 
 Parameter | Type | Description
@@ -858,6 +1177,8 @@ curl "https://membership-hktcare.webssup.com/oauth/vas/list" \
 ```json
 [
   {
+    "id": 74,
+    "uuid": "432eaa8f-7790-49e0-be9f-38b35726922c",
     "plan_day": 60,
     "remaining_credits": 0,
     "contract_end_date": "2021-03-04",
@@ -889,12 +1210,86 @@ Get an user's vas subscriptions.
 
 Parameter | Type | Description
 --------- | ---- | -----------
-Authorization | string | **Required**
+Authorization | string | **Required**. Must be follow the format ``Bearer access_token``
 
 ### Response Body
 
 Parameter | Type | Description
 --------- | ---- | -----------
+id | int | Subscriber ID.
+uuid | string | UUID used for accessing individual vas entry.
+plan_day | int | Plan Day
+remaining_credits | int | Remaining Credits
+contract_end_date | date | Contract End Date, in **YYYY-MM-DD**.
+purchase_records | object[] | TravelCare purchases made under the subscription.
+`purchase_records[].plan` | string | Purchase plan type, valid values are **A** and **B**
+`purchase_records[].total_day` | int | Total Day.
+`purchase_records[].total_traveler` | int | Total Traveler.
+`purchase_records[].request_no` | string | Request Number.
+`purchase_records[].policy_no` | string | Policy Number.
+`purchase_records[].created_at` | date | Purchase Creation Date, in **YYYY-MM-DD**.
+`purchase_records[].commencement_date` | date | Contract Start Date, in **YYYY-MM-DD**.
+`purchase_records[].expiry_date` | date | Contract Expiry Date, in **YYYY-MM-DD**.
+
+## Get Value-added Service
+
+> To get an user's vas subscription, use this code:
+
+```shell
+curl "https://membership-hktcare.webssup.com/oauth/vas/46694901-59e3-451d-a63d-9d960cf3431e" \
+  -X GET \
+  -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..."
+```
+
+> The above command returns JSON structured like this:
+
+```json
+{
+  "id": 74,
+  "uuid": "432eaa8f-7790-49e0-be9f-38b35726922c",
+  "plan_day": 60,
+  "remaining_credits": 0,
+  "contract_end_date": "2021-03-04",
+  "purchase_records": [
+    {
+      "plan": "B",
+      "total_day": 59,
+      "total_traveler": 1,
+      "request_no": "RQTT01095",
+      "policy_no": "73TT001001",
+      "created_at": "2019-09-25",
+      "commencement_date": "2019-09-25",
+      "expiry_date": "2019-11-22"
+    },
+    ...
+  ]
+}
+```
+
+Get an user's vas subscriptions.
+
+### HTTP Request
+
+`GET /oauth/vas/{uuid}`
+
+### Request Header
+
+Parameter | Type | Description
+--------- | ---- | -----------
+Authorization | string | **Required**. Must be follow the format ``Bearer access_token``
+
+### Path Parameters
+
+Parameter | Type | Description
+--------- | ---- | -----------
+uuid | string | UUID of the vas subscription
+
+### Response Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+id | int | Subscriber ID.
+uuid | string | UUID used for accessing individual vas entry.
 plan_day | int | Plan Day
 remaining_credits | int | Remaining Credits
 contract_end_date | date | Contract End Date, in **YYYY-MM-DD**.
@@ -1013,7 +1408,7 @@ This endpoint links the user with a third party identity.
 
 Parameter | Type | Description
 --------- | ---- | -----------
-Authorization | string | **Required**
+Authorization | string | **Required**. Must be follow the format ``Bearer access_token``
 
 ### Request Body
 
@@ -1070,7 +1465,7 @@ This endpoint removes the user's link with a third party identity provider.
 
 Parameter | Type | Description
 --------- | ---- | -----------
-Authorization | string | **Required**
+Authorization | string | **Required**. Must be follow the format ``Bearer access_token``
 
 ### Request Body
 
@@ -1140,12 +1535,80 @@ access_token | string | Access token.
 token_type | string | Token Type. Only **Bearer** is available.
 expires_in | string | Expiration time in seconds.
 
-## List Paginated Users
+## Import Plans
 
-> To list 5 users sorted by given name in descending order at page 2, use this code:
+> To import a list of plans, use this code:
 
 ```shell
-curl "https://membership-hktcare.webssup.com/oauth/list?limit=5&page=2&sort_by=given_name&order=desc" \
+curl "https://membership-hktcare.webssup.com/oauth/plans/import" \
+  -X POST \
+  -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..." \
+  -d @request.json
+```
+
+> In request.json:
+
+```json
+[
+  {
+    "provider": "iguard",
+    "hkid": "Z3308910",
+    "third_party_id": "CIF180203Z3308",
+    "payload": {
+        "registration_date": "2018-02-03",
+        "ref_no.": "CIF180203Z3308",
+        "title": "Ms",
+        "surname": "LI",
+        "given_name": "KA LAI",
+        "hkid": "Z3308910",
+        "brand": "Apple",
+        "model": "10.5 IPAD PRO WIFI+ CELL 64GB ",
+        "imei": "355819083203335",
+        "purchase_price": null,
+        "effective_date": null
+    }		
+  },
+  ...
+]
+```
+
+Imports a list of plans.
+
+### HTTP Request
+
+`GET /oauth/plans/import`
+
+### Request Header
+
+Parameter | Type | Description
+--------- | ---- | -----------
+Authorization | string | **Required**. Must be follow the format ``Bearer access_token``
+
+### Request Body
+
+Parameter | Type | Description
+--------- | ---- | -----------
+provider | string | **Required**. Must be **iguard** or **easyhealth**.
+hkid | string | **Required**. The plan owner's HKID.
+third_party_id | string | **Required**. Should be unique under the same **hkid** and **provider**.
+payload | object | **Required**. Plan's content.
+
+<aside class="warning">
+Entries with duplicate <strong>provider</strong>, <strong>hkid</strong> and <strong>third_party_id</strong> are overwritten by their newer variants.
+</aside>
+
+### Response Body
+
+<aside class="notice">
+This request has no response body.
+</aside>
+
+## List Paginated Users
+
+> To list 5 users sorted by given name in descending order at page 2 containing the term "mandy", use this code:
+
+```shell
+curl "https://membership-hktcare.webssup.com/oauth/list?limit=5&page=2&sort_by=given_name&order=desc&search=mandy" \
   -X GET \
   -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..."
 ```
@@ -1170,6 +1633,7 @@ curl "https://membership-hktcare.webssup.com/oauth/list?limit=5&page=2&sort_by=g
                 "verifed_at": null,
                 "verified": false
             },
+            "theclub_poinst": 0,
             "identities": [...]
         },
         {...},
@@ -1193,7 +1657,7 @@ List users with pagination.
 
 Parameter | Type | Description
 --------- | ---- | -----------
-Authorization | string | **Required**
+Authorization | string | **Required**. Must be follow the format ``Bearer access_token``
 
 ### Query Parameters
 
@@ -1203,6 +1667,7 @@ limit | number | **Required**. Item per page.
 page | number | **Optional**. The page to be fetched, default to 1.
 sort_by | string | **Optional**. Column to sort by, valid value are **created_at**, which is the default value, **updated_at**, **given_name** and **family_name**.
 order | string | **Optional**. Valid value are **asc** and **desc**.
+search | string | **Optional**. If provided, only user with attributes containing the search term will be shown.
 
 ### Response Body
 
@@ -1248,7 +1713,7 @@ The access token granted has elevated scope. And can update user profile without
 
 Parameter | Type | Description
 --------- | ---- | -----------
-Authorization | string | **Required**
+Authorization | string | **Required**. Must be follow the format ``Bearer access_token``
 
 ### Path Parameters
 
@@ -1309,7 +1774,7 @@ This request requires an access token with elevated scope, see <a href="#imperso
 
 Parameter | Type | Description
 --------- | ---- | -----------
-Authorization | string | **Required**. Access token for identifying the user.
+Authorization | string | **Required**. Must be follow the format ``Bearer access_token``. Access token for identifying the user.
 
 ### Request Body
 
@@ -1335,53 +1800,12 @@ This request has no response body.
 
 # Mobile Application API
 
-## Create Device Identity
-
-> To create a device-id entry without logging in, use this code: 
-
-```shell
-curl "https://membership-hktcare.webssup.com/oauth/device/create" \
-  -X POST \
-  -H "Content-Type: application/json" \
-  -d @request.json
-```
-
-> In request.json:
-
-```json
-{
-  "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
-  "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
-  "device_id": "5b737ca6-a4c7–488e-b928–8452960c4be9"
-}
-```
-
-This endpoint create a device id entry without a logged in user.
-
-### HTTP Request
-
-`POST /oauth/device/create`
-
-### Request Body
-
-Parameter | Type | Description
---------- | ---- | -----------
-client_id | string | **Required**. The client id registered for the application.
-client_secret | string | **Required**. The client secret registered for the application.
-device_id | string | **Required**. The device id.
-
-### Response Body
-
-<aside class="notice">
-This request has no response body.
-</aside>
-
-## Link Device Identity
+## Link Device Token
 
 > To link a device-id with the logged-in user, use this code: 
 
 ```shell
-curl "https://membership-hktcare.webssup.com/oauth/device/create" \
+curl "https://membership-hktcare.webssup.com/oauth/device/link" \
   -X POST \
   -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..." \
   -H "Content-Type: application/json" \
@@ -1394,14 +1818,15 @@ curl "https://membership-hktcare.webssup.com/oauth/device/create" \
 {
   "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
   "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
-  "device_id": "5b737ca6-a4c7–488e-b928–8452960c4be9"
+  "token": "5b737ca6-a4c7–488e-b928–8452960c4be9",
+  "os": "ios"
 }
 ```
 
 This endpoint link a device id with a user.
 
 <aside class="notice">
-This request <strong>DOES NOT</strong> require a device identity be created preemptively.
+This request <strong>DOES NOT</strong> require a Device Token be created preemptively.
 </aside>
 
 ### HTTP Request
@@ -1412,7 +1837,11 @@ This request <strong>DOES NOT</strong> require a device identity be created pree
 
 Parameter | Type | Description
 --------- | ---- | -----------
-Authorization | string | **Required**. Access token for identifying the user.
+Authorization | string | **Optional**. Must be follow the format ``Bearer access_token``
+
+<aside class="notice">
+A dummy will be used as ISDN without **Authorization Header**.
+</aside>
 
 ### Request Body
 
@@ -1420,7 +1849,8 @@ Parameter | Type | Description
 --------- | ---- | -----------
 client_id | string | **Required**. The client id registered for the application.
 client_secret | string | **Required**. The client secret registered for the application.
-device_id | string | **Required**. The device id.
+token | string | **Required**. The device token.
+os | string | **Required**. Must be **android** or **ios**.
 
 ### Response Body
 
@@ -1428,13 +1858,12 @@ device_id | string | **Required**. The device id.
 This request has no response body.
 </aside>
 
+## Unlink Device Token
 
-## Delete Device Identity
-
-> To remove a device-id, use this code: 
+> To unlink a device-id, use this code: 
 
 ```shell
-curl "https://membership-hktcare.webssup.com/oauth/device/delete" \
+curl "https://membership-hktcare.webssup.com/oauth/device/unlink" \
   -X POST \
   -H "Content-Type: application/json" \
   -d @request.json
@@ -1446,7 +1875,8 @@ curl "https://membership-hktcare.webssup.com/oauth/device/delete" \
 {
   "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
   "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
-  "device_id": "5b737ca6-a4c7–488e-b928–8452960c4be9"
+  "token": "5b737ca6-a4c7–488e-b928–8452960c4be9",
+  "os": "ios"
 }
 ```
 
@@ -1454,7 +1884,17 @@ This endpoint deletes a device id entry.
 
 ### HTTP Request
 
-`POST /oauth/device/delete`
+`POST /oauth/device/unlink`
+
+### Request Header
+
+Parameter | Type | Description
+--------- | ---- | -----------
+Authorization | string | **Optional**. Must be follow the format ``Bearer access_token``
+
+<aside class="notice">
+The device identity will be deleted if no **Authorization Header** provided.
+</aside>
 
 ### Request Body
 
@@ -1462,7 +1902,8 @@ Parameter | Type | Description
 --------- | ---- | -----------
 client_id | string | **Required**. The client id registered for the application.
 client_secret | string | **Required**. The client secret registered for the application.
-device_id | string | **Required**. The device id.
+token | string | **Required**. The device token.
+os | string | **Required**. Must be **android** or **ios**.
 
 ### Response Body
 
@@ -1470,13 +1911,14 @@ device_id | string | **Required**. The device id.
 This request has no response body.
 </aside>
 
-## List Device Identities
+## Update Device Token
 
-> To get a list of device identities, use this code: 
+> To update a device-id, use this code: 
 
 ```shell
-curl "https://membership-hktcare.webssup.com/oauth/device/list" \
-  -X GET \
+curl "https://membership-hktcare.webssup.com/oauth/device/update" \
+  -X POST \
+  -H "Authorization: Bearer ya29.Il-xB8pDp2D1WTszc7SZ3..." \
   -H "Content-Type: application/json" \
   -d @request.json
 ```
@@ -1487,28 +1929,29 @@ curl "https://membership-hktcare.webssup.com/oauth/device/list" \
 {
   "client_id": "1100df6e-65c2-405b-aa18-4751d1c820e8",
   "client_secret": "MdZ8td76bKbornqkjfKGshSO3a8YG3DYZBGFThcU",
+  "token": {
+      "old": "5b737ca6-a4c7–488e-b928–8452960c4be9",
+      "new": "251bce06-0475-4690-8801-e533f7492da4"
+  },
+  "os": "ios"
 }
 ```
 
-> The above command returns JSON structured like this:
-
-```json
-[
-  {
-    "device_id": "dd8b47f7-be97-4ad0-8c4b-7a6cd4b4c9c6"
-  },
-  {
-    "device_id": "9e746884-0d9f-400b-8081-e7be92bd4502"
-  },
-  ...  
-]
-```
-
-This endpoint list all device identities.
+This endpoint updates a device id entry.
 
 ### HTTP Request
 
-`GET /oauth/device/list`
+`POST /oauth/device/update`
+
+### Request Header
+
+Parameter | Type | Description
+--------- | ---- | -----------
+Authorization | string | **Optional**. Must be follow the format ``Bearer access_token``
+
+<aside class="notice">
+A dummy will be used as ISDN without **Authorization Header**.
+</aside>
 
 ### Request Body
 
@@ -1516,19 +1959,22 @@ Parameter | Type | Description
 --------- | ---- | -----------
 client_id | string | **Required**. The client id registered for the application.
 client_secret | string | **Required**. The client secret registered for the application.
+`token.old` | string | **Required**. The old device token.
+`token.new` | string | **Required**. The new device token.
+os | string | **Required**. Must be **android** or **ios**.
 
 ### Response Body
 
-Parameter | Type | Description
---------- | ---- | -----------
-device_id | string | Registered Device Identity.
+<aside class="notice">
+This request has no response body.
+</aside>
 
 ## Retrieve Configuration
 
 > To get the mobile app configuration, use this code: 
 
 ```shell
-curl -X GET "https://membership-hktcare.webssup.com/configuration"
+curl -X GET "http://hktcare-web.webssup.com/configuration"
 ```
 
 > The above command returns JSON structured like this:
